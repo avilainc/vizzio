@@ -1,0 +1,23 @@
+//! Clustering algorithms
+
+pub mod adaptive;
+pub mod affinity_propagation;
+pub mod birch;
+pub mod constrained;
+pub mod dbscan;
+pub mod ensemble;
+pub mod fuzzy_cmeans;
+pub mod gmm;
+pub mod graph;
+pub mod hdbscan;
+pub mod hierarchical;
+pub mod kmeans;
+pub mod kmedoids;
+pub mod mean_shift;
+pub mod multimodal;
+pub mod online;
+pub mod optics;
+pub mod spectral;
+pub mod streaming;
+pub mod text;
+pub mod timeseries;
