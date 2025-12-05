@@ -27,14 +27,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Vizzio Platform - Partner Notifications ===\n");
 
     // 🔐 Configuration (in production, use environment variables)
-    let smtp_host = std::env::var("SMTP_HOST").unwrap_or_else(|_| "smtp.gmail.com".to_string());
+    let smtp_host = std::env::var("SMTP_HOST").unwrap_or_else(|_| "smtp.porkbun.com".to_string());
     let smtp_port: u16 = std::env::var("SMTP_PORT")
         .ok()
         .and_then(|p| p.parse().ok())
         .unwrap_or(587);
-    let from_email = std::env::var("SMTP_USER").unwrap_or_else(|_| "noreply@vizzio.dev".to_string());
+    let from_email = std::env::var("SMTP_USER").unwrap_or_else(|_| "dev@avila.inc".to_string());
     let smtp_user = std::env::var("SMTP_USER").unwrap_or_else(|_| from_email.clone());
-    let smtp_password = std::env::var("SMTP_PASSWORD").unwrap_or_else(|_| "your-app-password".to_string());
+    let smtp_password = std::env::var("SMTP_PASSWORD").unwrap_or_else(|_| "seu-app-password".to_string());
 
     println!("📧 Configuração:");
     println!("   SMTP Host: {}", smtp_host);
