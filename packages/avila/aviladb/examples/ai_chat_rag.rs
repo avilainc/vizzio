@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
         (
             "Tell me about pricing",
-            "R$ 0,50 per 1M operations, 40-60% cheaper than AWS/Azure",
+            "R$ 0,50 per 1M operations, 40-60% cheaper than competitors",
             generate_fake_embedding(1536),
         ),
     ];

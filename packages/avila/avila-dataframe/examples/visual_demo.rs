@@ -149,7 +149,7 @@ fn main() -> Result<()> {
     println!();
     println!("  5. 🇧🇷 Otimizado para Brasil:");
     println!("     • Latência < 10ms em São Paulo");
-    println!("     • 40-60% mais barato que AWS/Azure");
+    println!("     • 40-60% mais barato que concorrentes");
     println!("     • Suporte em português");
     println!();
 

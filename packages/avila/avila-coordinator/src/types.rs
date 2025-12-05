@@ -1,7 +1,7 @@
 //! # Types - Core type definitions
 
 /// Unique identifier for tasks
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub struct TaskId(pub u64);
 
 impl TaskId {

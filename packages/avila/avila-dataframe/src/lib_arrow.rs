@@ -9,7 +9,7 @@
 //! - **Query Engine**: Lazy evaluation with SQL support
 //! - **Built-in Science**: FFT, wavelets, signal processing, astronomy functions
 //! - **High Performance**: SIMD, GPU acceleration, distributed computing
-//! - **Native Integration**: AvilaDB, cloud storage (S3, Azure, GCS)
+//! - **Native Integration**: AvilaDB, cloud storage (S3, GCS)
 //!
 //! ## Quick Start
 //!

@@ -1,5 +1,5 @@
 //! Prime number generation and testing
-//! 
+//!
 //! Implements primality tests and number theory functions
 
 use crate::arithmetic::{cmp, sub, is_zero};
@@ -11,7 +11,7 @@ pub fn gcd(a: &[u64], b: &[u64], result: &mut [u64]) {
     let n = a.len();
     let mut u = a.to_vec();
     let mut v = b.to_vec();
-    
+
     // Handle zero cases
     if is_zero(&u) {
         result.copy_from_slice(&v);
@@ -21,7 +21,7 @@ pub fn gcd(a: &[u64], b: &[u64], result: &mut [u64]) {
         result.copy_from_slice(&u);
         return;
     }
-    
+
     // Remove common factors of 2
     let mut shift = 0u32;
     while (u[0] & 1) == 0 && (v[0] & 1) == 0 {
@@ -34,7 +34,7 @@ pub fn gcd(a: &[u64], b: &[u64], result: &mut [u64]) {
         v[n-1] >>= 1;
         shift += 1;
     }
-    
+
     // Remove remaining factors of 2 from u
     while (u[0] & 1) == 0 {
         for i in 0..n-1 {
@@ -42,7 +42,7 @@ pub fn gcd(a: &[u64], b: &[u64], result: &mut [u64]) {
         }
         u[n-1] >>= 1;
     }
-    
+
     loop {
         // Remove factors of 2 from v
         while (v[0] & 1) == 0 {
@@ -51,21 +51,21 @@ pub fn gcd(a: &[u64], b: &[u64], result: &mut [u64]) {
             }
             v[n-1] >>= 1;
         }
-        
+
         // Ensure u <= v
         if matches!(cmp(&u, &v), Ordering::Greater) {
             core::mem::swap(&mut u, &mut v);
         }
-        
+
         // v = v - u
         sub(&v, &u, &mut v);
-        
+
         // Check if done
         if is_zero(&v) {
             break;
         }
     }
-    
+
     // Multiply result by 2^shift
     result.copy_from_slice(&u);
     for _ in 0..shift {
@@ -96,26 +96,26 @@ pub fn trial_division(n: &[u64]) -> bool {
         157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233,
         239, 241, 251,
     ];
-    
+
     // Check against small primes
     for &p in &SMALL_PRIMES {
         // Simple modulo check using the first limb if n is small
         if n[0] < p * p && n[1..].iter().all(|&x| x == 0) {
             return n[0] == p;
         }
-        
+
         // Check if divisible by p
         let mut remainder = 0u64;
         for &limb in n.iter().rev() {
             let dividend = ((remainder as u128) << 64) | (limb as u128);
             remainder = (dividend % p as u128) as u64;
         }
-        
+
         if remainder == 0 {
             return false; // Composite
         }
     }
-    
+
     true // Passed trial division (probably prime)
 }
 
@@ -132,12 +132,12 @@ pub fn is_prime_miller_rabin(n: &[u64], rounds: u32) -> bool {
     if is_even(n) {
         return false;
     }
-    
+
     // Trial division first
     if !trial_division(n) {
         return false;
     }
-    
+
     // For now, if it passes trial division, consider it probably prime
     // Full Miller-Rabin would require modular exponentiation
     // which we'll implement when we have better modular arithmetic

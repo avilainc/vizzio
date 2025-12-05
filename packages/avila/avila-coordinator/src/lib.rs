@@ -30,7 +30,7 @@ pub use task::{Task, TaskState};
 pub use coordinator::Coordinator;
 pub use priority::Priority;
 pub use dependencies::{TaskDependency, DependencyGraph};
-pub use scheduler::{Scheduler, FifoScheduler, PriorityScheduler, FairScheduler};
+pub use scheduler::{Scheduler, FifoScheduler, PriorityScheduler, FairScheduler, DeadlineScheduler, WeightedScheduler};
 pub use metrics::{TaskMetrics, MetricsCollector};
 pub use events::{TaskEvent, EventHandler, EventBus};
 pub use retry::{RetryPolicy, TaskRetryInfo, BackoffStrategy, RetryManager};

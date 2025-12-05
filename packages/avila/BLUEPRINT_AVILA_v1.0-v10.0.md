@@ -329,7 +329,7 @@ authors = ["Vizzio Team"]
 - **Edge caching** integrado
 - **Global load balancer**
 - **Disaster recovery** automático
-- **Multi-cloud** (AWS, GCP, Azure)
+- **Multi-cloud** (AWS, GCP)
 
 ##### 4. Service Mesh
 ```rust

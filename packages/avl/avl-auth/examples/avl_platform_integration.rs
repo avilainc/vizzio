@@ -162,7 +162,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!();
 
     println!("   💰 Cost Savings:");
-    println!("   • 40-60% cheaper than AWS/Azure for Brazilian workloads");
+    println!("   • 40-60% cheaper than AWS/GCP for Brazilian workloads");
     println!("   • Native compression reduces storage costs");
     println!("   • Efficient data structures minimize compute");
     println!();

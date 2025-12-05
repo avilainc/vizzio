@@ -279,7 +279,7 @@ fn main() -> Result<()> {
     println!("   ✅ Cloud-native (no files!)");
     println!("   ✅ Real-time queries with SQL");
     println!("   ✅ Automatic scaling");
-    println!("   ✅ 40-60% cheaper than AWS/Azure");
+    println!("   ✅ 40-60% cheaper than competitors");
     println!("   ✅ Built in Brazil 🇧🇷");
 
     // ========== CLEANUP ==========

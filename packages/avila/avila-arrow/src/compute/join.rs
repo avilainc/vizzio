@@ -103,7 +103,7 @@ pub fn right_join_i32(left_keys: &[i32], right_keys: &[i32]) -> JoinResult {
 /// Semi join - returns left rows that have a match in right
 pub fn semi_join_i32(left_keys: &[i32], right_keys: &[i32]) -> Vec<usize> {
     let right_set: std::collections::HashSet<i32> = right_keys.iter().copied().collect();
-    
+
     left_keys
         .iter()
         .enumerate()
@@ -120,7 +120,7 @@ pub fn semi_join_i32(left_keys: &[i32], right_keys: &[i32]) -> Vec<usize> {
 /// Anti join - returns left rows that don't have a match in right
 pub fn anti_join_i32(left_keys: &[i32], right_keys: &[i32]) -> Vec<usize> {
     let right_set: std::collections::HashSet<i32> = right_keys.iter().copied().collect();
-    
+
     left_keys
         .iter()
         .enumerate()
@@ -204,7 +204,7 @@ mod tests {
     fn test_inner_join() {
         let left = vec![1, 2, 3, 4];
         let right = vec![3, 4, 5, 6];
-        
+
         let result = inner_join_i32(&left, &right);
         assert_eq!(result.left_indices, vec![2, 3]);
         assert_eq!(result.right_indices, vec![0, 1]);
@@ -214,7 +214,7 @@ mod tests {
     fn test_inner_join_duplicates() {
         let left = vec![1, 2, 2, 3];
         let right = vec![2, 2, 4];
-        
+
         let result = inner_join_i32(&left, &right);
         // Each left 2 should match with each right 2
         assert_eq!(result.left_indices, vec![1, 1, 2, 2]);
@@ -225,7 +225,7 @@ mod tests {
     fn test_left_join() {
         let left = vec![1, 2, 3];
         let right = vec![2, 4];
-        
+
         let result = left_join_i32(&left, &right);
         assert_eq!(result.left_indices, vec![0, 1, 2]);
         assert_eq!(result.right_indices, vec![usize::MAX, 0, usize::MAX]);
@@ -235,7 +235,7 @@ mod tests {
     fn test_right_join() {
         let left = vec![1, 2];
         let right = vec![2, 3, 4];
-        
+
         let result = right_join_i32(&left, &right);
         assert_eq!(result.left_indices, vec![1, usize::MAX, usize::MAX]);
         assert_eq!(result.right_indices, vec![0, 1, 2]);
@@ -245,7 +245,7 @@ mod tests {
     fn test_semi_join() {
         let left = vec![1, 2, 3, 4];
         let right = vec![2, 4, 6];
-        
+
         let result = semi_join_i32(&left, &right);
         assert_eq!(result, vec![1, 3]); // Indices of 2 and 4 in left
     }
@@ -254,7 +254,7 @@ mod tests {
     fn test_anti_join() {
         let left = vec![1, 2, 3, 4];
         let right = vec![2, 4, 6];
-        
+
         let result = anti_join_i32(&left, &right);
         assert_eq!(result, vec![0, 2]); // Indices of 1 and 3 in left
     }
@@ -263,7 +263,7 @@ mod tests {
     fn test_string_join() {
         let left = vec!["a".to_string(), "b".to_string(), "c".to_string()];
         let right = vec!["b".to_string(), "c".to_string(), "d".to_string()];
-        
+
         let result = inner_join_string(&left, &right);
         assert_eq!(result.left_indices, vec![1, 2]);
         assert_eq!(result.right_indices, vec![0, 1]);
@@ -281,7 +281,7 @@ mod tests {
             vec![3, 30],
             vec![4, 40],
         ];
-        
+
         let result = inner_join_multi_i32(&left, &right).unwrap();
         assert_eq!(result.left_indices, vec![1, 2]);
         assert_eq!(result.right_indices, vec![0, 1]);

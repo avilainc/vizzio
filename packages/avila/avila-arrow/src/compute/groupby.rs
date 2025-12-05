@@ -20,7 +20,7 @@ pub fn group_by_sum_i32(keys: &[i32], values: &[i32]) -> Result<GroupByResult<i3
     }
 
     let mut groups: HashMap<i32, i64> = HashMap::new();
-    
+
     for (key, value) in keys.iter().zip(values.iter()) {
         *groups.entry(*key).or_insert(0) += *value as i64;
     }
@@ -48,7 +48,7 @@ pub fn group_by_mean_i32(keys: &[i32], values: &[i32]) -> Result<GroupByResult<i
     }
 
     let mut groups: HashMap<i32, (i64, usize)> = HashMap::new();
-    
+
     for (key, value) in keys.iter().zip(values.iter()) {
         let entry = groups.entry(*key).or_insert((0, 0));
         entry.0 += *value as i64;
@@ -75,7 +75,7 @@ pub fn group_by_mean_i32(keys: &[i32], values: &[i32]) -> Result<GroupByResult<i
 /// Group by with count aggregation
 pub fn group_by_count_i32(keys: &[i32]) -> GroupByResult<i32> {
     let mut groups: HashMap<i32, usize> = HashMap::new();
-    
+
     for key in keys {
         *groups.entry(*key).or_insert(0) += 1;
     }
@@ -103,7 +103,7 @@ pub fn group_by_min_i32(keys: &[i32], values: &[i32]) -> Result<GroupByResult<i3
     }
 
     let mut groups: HashMap<i32, i32> = HashMap::new();
-    
+
     for (key, value) in keys.iter().zip(values.iter()) {
         groups.entry(*key)
             .and_modify(|min| *min = (*min).min(*value))
@@ -133,7 +133,7 @@ pub fn group_by_max_i32(keys: &[i32], values: &[i32]) -> Result<GroupByResult<i3
     }
 
     let mut groups: HashMap<i32, i32> = HashMap::new();
-    
+
     for (key, value) in keys.iter().zip(values.iter()) {
         groups.entry(*key)
             .and_modify(|max| *max = (*max).max(*value))
@@ -163,7 +163,7 @@ pub fn group_by_sum_f64(keys: &[i32], values: &[f64]) -> Result<GroupByResult<i3
     }
 
     let mut groups: HashMap<i32, f64> = HashMap::new();
-    
+
     for (key, value) in keys.iter().zip(values.iter()) {
         *groups.entry(*key).or_insert(0.0) += value;
     }
@@ -191,7 +191,7 @@ pub fn group_by_mean_f64(keys: &[i32], values: &[f64]) -> Result<GroupByResult<i
     }
 
     let mut groups: HashMap<i32, (f64, usize)> = HashMap::new();
-    
+
     for (key, value) in keys.iter().zip(values.iter()) {
         let entry = groups.entry(*key).or_insert((0.0, 0));
         entry.0 += value;
@@ -242,7 +242,7 @@ pub fn group_by_multi_i32(keys: &[i32], values: &[i32]) -> Result<MultiAggResult
     }
 
     let mut groups: HashMap<i32, Stats> = HashMap::new();
-    
+
     for (key, value) in keys.iter().zip(values.iter()) {
         groups.entry(*key)
             .and_modify(|stats| {
@@ -289,7 +289,7 @@ mod tests {
     fn test_group_by_sum() {
         let keys = vec![1, 2, 1, 2, 1];
         let values = vec![10, 20, 15, 25, 5];
-        
+
         let result = group_by_sum_i32(&keys, &values).unwrap();
         assert_eq!(result.keys, vec![1, 2]);
         assert_eq!(result.aggregates, vec![30.0, 45.0]);
@@ -299,7 +299,7 @@ mod tests {
     fn test_group_by_mean() {
         let keys = vec![1, 2, 1, 2, 1];
         let values = vec![10, 20, 20, 30, 30];
-        
+
         let result = group_by_mean_i32(&keys, &values).unwrap();
         assert_eq!(result.keys, vec![1, 2]);
         assert_eq!(result.aggregates, vec![20.0, 25.0]);
@@ -308,7 +308,7 @@ mod tests {
     #[test]
     fn test_group_by_count() {
         let keys = vec![1, 2, 1, 3, 2, 1];
-        
+
         let result = group_by_count_i32(&keys);
         assert_eq!(result.keys, vec![1, 2, 3]);
         assert_eq!(result.aggregates, vec![3.0, 2.0, 1.0]);
@@ -318,11 +318,11 @@ mod tests {
     fn test_group_by_min_max() {
         let keys = vec![1, 2, 1, 2];
         let values = vec![10, 30, 5, 40];
-        
+
         let min_result = group_by_min_i32(&keys, &values).unwrap();
         assert_eq!(min_result.keys, vec![1, 2]);
         assert_eq!(min_result.aggregates, vec![5.0, 30.0]);
-        
+
         let max_result = group_by_max_i32(&keys, &values).unwrap();
         assert_eq!(max_result.keys, vec![1, 2]);
         assert_eq!(max_result.aggregates, vec![10.0, 40.0]);
@@ -332,7 +332,7 @@ mod tests {
     fn test_group_by_multi() {
         let keys = vec![1, 2, 1, 2, 1];
         let values = vec![10, 20, 30, 40, 50];
-        
+
         let result = group_by_multi_i32(&keys, &values).unwrap();
         assert_eq!(result.keys, vec![1, 2]);
         assert_eq!(result.sum, vec![90.0, 60.0]);
@@ -346,7 +346,7 @@ mod tests {
     fn test_group_by_f64() {
         let keys = vec![1, 2, 1, 2];
         let values = vec![1.5, 2.5, 3.5, 4.5];
-        
+
         let result = group_by_sum_f64(&keys, &values).unwrap();
         assert_eq!(result.keys, vec![1, 2]);
         assert_eq!(result.aggregates, vec![5.0, 7.0]);

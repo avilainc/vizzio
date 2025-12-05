@@ -40,7 +40,7 @@
 
 ### Aritmética Modular (`crypto::modular`)
 - ✅ **mod_add**: Adição modular (a + b) mod m
-- ✅ **mod_sub**: Subtração modular (a - b) mod m  
+- ✅ **mod_sub**: Subtração modular (a - b) mod m
 - ✅ **mod_mul_simple**: Multiplicação modular (a × b) mod m
 - ✅ **mod_pow**: Exponenciação modular (a^b mod m) - Square-and-multiply
 
@@ -74,7 +74,7 @@
 ```rust
 // Linhas de código implementadas (estimativa):
 // - src/types/        ~400 linhas
-// - src/arithmetic/   ~200 linhas  
+// - src/arithmetic/   ~200 linhas
 // - src/crypto/       ~300 linhas
 // - Total:            ~900 linhas de Rust puro!
 
@@ -185,7 +185,7 @@ cargo run --example crypto_demo
 
 Esta biblioteca é construída do zero, com foco em:
 - **Simplicidade**: Código legível e compreensível
-- **Performance**: Algoritmos eficientes desde o início  
+- **Performance**: Algoritmos eficientes desde o início
 - **Segurança**: Base sólida para criptografia
 - **Independência**: Zero deps = zero supply chain attacks
 

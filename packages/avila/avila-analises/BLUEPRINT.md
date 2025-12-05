@@ -766,7 +766,6 @@ impl KafkaConsumer {
 
 pub mod aws;
 pub mod gcp;
-pub mod azure;
 
 // AWS Integration
 pub struct AWSIntegration {

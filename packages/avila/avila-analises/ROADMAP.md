@@ -412,10 +412,6 @@
   - [ ] Pub/Sub integration
   - [ ] BigQuery export
 
-- [ ] **src/cloud/azure.rs**
-  - [ ] Event Hubs integration
-  - [ ] Blob Storage
-
 ### 🌍 5.4 SDK para Outras Linguagens (novo)
 
 - [ ] Python SDK (`sdks/python/`)

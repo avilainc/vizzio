@@ -3,7 +3,6 @@ extern crate alloc;
 use alloc::vec::Vec;
 use alloc::string::String;
 use crate::types::{TaskId, TaskError};
-use crate::task::TaskState;
 
 /// Workflow node representing a task in the DAG
 #[derive(Clone, Debug, PartialEq)]
@@ -59,13 +58,15 @@ impl Workflow {
 
     pub fn add_edge(&mut self, from: TaskId, to: TaskId) -> Result<(), TaskError> {
         // Find the 'to' node and add 'from' as dependency
-        if let Some(node) = self.nodes.iter_mut().find(|n| n.task_id == to) {
-            node.add_dependency(from);
+        let node_index = self.nodes.iter().position(|n| n.task_id == to);
 
-            // Check for cycles
+        if let Some(idx) = node_index {
+            self.nodes[idx].add_dependency(from);
+
+            // Check for cycles after adding the dependency
             if self.has_cycle() {
                 // Remove the dependency we just added
-                node.dependencies.retain(|&id| id != from);
+                self.nodes[idx].dependencies.retain(|&id| id != from);
                 return Err(TaskError::CircularDependency);
             }
             Ok(())

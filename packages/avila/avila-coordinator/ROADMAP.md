@@ -72,8 +72,8 @@
 #### ✅ Schedulers Adicionais
 - [x] Implementar `PriorityScheduler` (heap-based)
 - [x] Criar `FairScheduler` (round-robin)
-- [ ] Adicionar `DeadlineScheduler` (com timestamps)
-- [ ] Implementar `WeightedScheduler` (com pesos)
+- [x] Adicionar `DeadlineScheduler` (com timestamps)
+- [x] Implementar `WeightedScheduler` (com pesos)
 
 #### ✅ Sistema de Eventos Completo
 - [x] Implementar `EventBus` para gerenciar handlers

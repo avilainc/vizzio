@@ -9,8 +9,7 @@ pub mod sync {
     use std::sync::{Arc, Mutex};
     use std::thread;
     use crate::coordinator::Coordinator;
-    use crate::types::{TaskId, TaskError};
-    use crate::task::TaskState;
+    use crate::types::TaskError;
 
     /// Thread-safe wrapper for Coordinator
     pub struct ConcurrentCoordinator {

@@ -579,7 +579,6 @@ src/
 
 **Plataformas:**
 - AWS Lambda functions
-- Azure Functions
 - Google Cloud Run
 - S3/Blob storage
 - Managed databases

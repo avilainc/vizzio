@@ -30,7 +30,7 @@ fn test_u1024_multiplication() {
 fn test_u1024_bitwise() {
     let a = U1024::from(0b11110000u64);
     let b = U1024::from(0b10101010u64);
-    
+
     assert_eq!(a & b, U1024::from(0b10100000u64));
     assert_eq!(a | b, U1024::from(0b11111010u64));
     assert_eq!(a ^ b, U1024::from(0b01011010u64));
@@ -47,7 +47,7 @@ fn test_u1024_shifts() {
 fn test_u1024_comparison() {
     let a = U1024::from(100u64);
     let b = U1024::from(200u64);
-    
+
     assert!(a < b);
     assert!(b > a);
     assert!(a <= b);
@@ -60,7 +60,7 @@ fn test_u1024_comparison() {
 fn test_u2048_operations() {
     let a = U2048::from(1000u64);
     let b = U2048::from(500u64);
-    
+
     assert_eq!(a + b, U2048::from(1500u64));
     assert_eq!(a - b, U2048::from(500u64));
     assert_eq!(a * b, U2048::from(500000u64));
@@ -70,7 +70,7 @@ fn test_u2048_operations() {
 fn test_u4096_operations() {
     let a = U4096::from(9999u64);
     let b = U4096::from(1111u64);
-    
+
     assert_eq!(a + b, U4096::from(11110u64));
     assert!(a > b);
 }
@@ -102,7 +102,7 @@ fn test_leading_trailing_zeros() {
     let one = U1024::from(1u64);
     assert_eq!(one.trailing_zeros(), 0);
     assert_eq!(one.leading_zeros(), 1023);
-    
+
     let eight = U1024::from(8u64);
     assert_eq!(eight.trailing_zeros(), 3);
 }

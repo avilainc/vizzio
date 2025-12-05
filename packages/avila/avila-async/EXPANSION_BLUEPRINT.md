@@ -417,9 +417,6 @@ avila_aws:
     - [ ] AWS SDK async
     - [ ] S3, DynamoDB, SQS, Lambda
 
-avila_azure:
-    - [ ] Azure SDK async
-
 avila_gcp:
     - [ ] GCP SDK async
 ```
@@ -754,7 +751,7 @@ Competitive Benchmarks:
 - [ ] Distributed tracing completo
 - [ ] Profiling tools
 - [ ] Performance dashboard
-- [ ] Cloud deployments (AWS, Azure, GCP)
+- [ ] Cloud deployments (AWS, GCP)
 
 **Entregas:**
 - ✅ v0.4.0: AI/ML production-ready, Industry 4.0 features

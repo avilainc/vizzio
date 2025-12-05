@@ -77,7 +77,7 @@ impl ITJobsExtractor {
         let common_skills = vec![
             "Rust", "Python", "Java", "JavaScript", "TypeScript", "Go", "C++", "C#",
             "React", "Vue", "Angular", "Node.js", "Django", "Flask", "Spring",
-            "Docker", "Kubernetes", "AWS", "Azure", "GCP",
+            "Docker", "Kubernetes", "AWS", "GCP",
             "PostgreSQL", "MySQL", "MongoDB", "Redis",
             "Git", "CI/CD", "Agile", "Scrum",
         ];

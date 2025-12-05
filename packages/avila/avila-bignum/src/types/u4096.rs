@@ -86,13 +86,13 @@ impl U4096 {
         }
         let mut quotient = Self::ZERO;
         let mut remainder = 0u64;
-        
+
         for i in (0..64).rev() {
             let dividend = ((remainder as u128) << 64) | (self.limbs[i] as u128);
             quotient.limbs[i] = (dividend / divisor as u128) as u64;
             remainder = (dividend % divisor as u128) as u64;
         }
-        
+
         (quotient, remainder)
     }
 }

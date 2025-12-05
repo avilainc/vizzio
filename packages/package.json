@@ -1,0 +1,85 @@
+{
+  "name": "vizzio-automation-platform",
+  "version": "1.0.0",
+  "description": "Complete Business Automation Platform | Plataforma Completa de Automação Empresarial",
+  "private": true,
+  "workspaces": [
+    "packages/core",
+    "packages/workflows",
+    "packages/email-service",
+    "packages/finance-tools",
+    "packages/marketing-automation",
+    "packages/sales-pipeline",
+    "packages/shortcuts",
+    "packages/integrations",
+    "packages/ai-assistant",
+    "packages/backend",
+    "packages/frontend",
+    "packages/mobile",
+    "packages/cli"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "format": "prettier --write \"packages/**/src/**/*.{ts,tsx,json,md}\"",
+    "clean": "npm run clean --workspaces && rimraf node_modules",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "install-dependencies": "npm install && npm install -g @types/node typescript",
+    "setup": "npm run install-dependencies && npm run build",
+    "dev:server": "cd packages/backend && npm run dev",
+    "dev:client": "cd packages/frontend && npm run dev",
+    "dev:all": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "start": "npm run dev:all",
+    "docs": "typedoc --out docs packages/*/src",
+    "db:migrate": "mongosh admin -u admin -p password123 --eval \"db.version()\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0",
+    "typedoc": "^0.25.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "automation",
+    "workflow",
+    "email",
+    "crm",
+    "marketing",
+    "sales",
+    "finance",
+    "monorepo"
+  ],
+  "author": "Avila Inc.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/avilainc/vizzio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/avilainc/vizzio/issues"
+  },
+  "homepage": "https://github.com/avilainc/vizzio#readme",
+  "dependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/bull": "^3.15.9",
+    "@types/commander": "^2.12.0",
+    "@types/nodemailer": "^7.0.4",
+    "axios": "^1.13.2",
+    "bull": "^4.16.5",
+    "commander": "^14.0.2",
+    "nodemailer": "^7.0.11"
+  }
+}

@@ -8,7 +8,7 @@
 //! - Latency distribution (P50/P95/P99/P999) - analyzed with **avila-telemetry**
 //! - Memory allocations and CPU profiling
 //! - Real-world workloads (gaming, AI chat, IoT)
-//! - Comparison with AWS DynamoDB and Azure Cosmos DB
+//! - Comparison with AWS DynamoDB and other cloud databases
 //!
 //! ## AVL Platform Integration
 //!
