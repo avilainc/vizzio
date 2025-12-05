@@ -161,20 +161,20 @@ function generateEmailHTML(partner, eventInfo) {
             <h1>📊 Vizzio Platform</h1>
             <p>Notificação de Atualização do Repositório</p>
         </div>
-        
+
         <div class="content">
             <p class="greeting">Olá <strong>${partner.name}</strong>,</p>
-            
+
             <p>Uma nova atualização foi realizada no repositório Vizzio Platform!</p>
-            
+
             <span class="badge ${eventInfo.type}">
                 ${eventInfo.badge}
             </span>
-            
+
             ${eventInfo.details}
-            
+
             <div class="divider"></div>
-            
+
             <table style="width: 100%; font-size: 13px; margin: 15px 0;">
                 <tr>
                     <td style="padding: 8px 0;"><strong>📦 Repositório:</strong></td>
@@ -185,10 +185,10 @@ function generateEmailHTML(partner, eventInfo) {
                     <td style="padding: 8px 0; text-align: right;">${new Date().toLocaleString('pt-BR')}</td>
                 </tr>
             </table>
-            
+
             <a href="${eventInfo.link}" class="btn">Ver Detalhes no GitHub →</a>
         </div>
-        
+
         <div class="footer">
             <p>© 2025 Vizzio Platform - Todos os direitos reservados</p>
             <p>Você está recebendo este email como sócio do projeto.</p>
@@ -211,7 +211,7 @@ function prepareEventInfo() {
     const commit = eventPayload.head_commit;
     const message = commit ? commit.message : 'Commit realizado';
     const author = commit ? commit.author.name : actor;
-    
+
     info.badge = '📤 PUSH';
     info.details = `
       <div class="info-block">
@@ -233,12 +233,12 @@ function prepareEventInfo() {
     `;
     info.link = `${serverUrl}/${repository}/commit/${sha}`;
   }
-  
+
   if (eventName === 'pull_request') {
     const pr = eventPayload.pull_request;
     const action = eventPayload.action;
     const actionLabel = action === 'opened' ? '🆕 ABERTO' : action === 'closed' ? '✅ FECHADO' : '🔄 ATUALIZADO';
-    
+
     info.badge = '🔀 PULL REQUEST';
     info.details = `
       <div class="info-block">
@@ -256,12 +256,12 @@ function prepareEventInfo() {
     `;
     info.link = pr.html_url;
   }
-  
+
   if (eventName === 'issues') {
     const issue = eventPayload.issue;
     const action = eventPayload.action;
     const actionLabel = action === 'opened' ? '🆕 ABERTA' : '✅ FECHADA';
-    
+
     info.badge = '⚠️ ISSUE';
     info.details = `
       <div class="info-block">
@@ -299,16 +299,16 @@ async function sendEmails() {
 
     // Preparar informações do evento
     const eventInfo = prepareEventInfo();
-    
+
     console.log(`\n📧 Preparando notificações para evento: ${eventName}`);
     console.log(`📦 Repositório: ${repository}`);
     console.log(`👤 Ator: ${actor}`);
-    
+
     // Enviar email para cada parceiro
     for (const partner of PARTNERS) {
       try {
         const html = generateEmailHTML(partner, eventInfo);
-        
+
         const mailOptions = {
           from: process.env.SEND_FROM || 'noreply@vizzio.dev',
           to: partner.email,

@@ -1,6 +1,6 @@
 //! State management for cells
 
-use crate::{Error, ErrorKind, Result};
+use crate::{Error, Result};
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, format};

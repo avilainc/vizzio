@@ -33,7 +33,7 @@ pub mod mime;
 pub mod encoding;
 pub mod auth;
 pub mod tcp;
-pub mod tls;
+pub mod notification;
 
 // TODO: Enable when dependencies are available
 // pub mod pop3;
@@ -114,8 +114,8 @@ impl EmailAddress {
 
     /// Validate email format
     pub fn is_valid(&self) -> bool {
-        !self.local.is_empty() 
-            && !self.domain.is_empty() 
+        !self.local.is_empty()
+            && !self.domain.is_empty()
             && self.domain.contains('.')
     }
 }

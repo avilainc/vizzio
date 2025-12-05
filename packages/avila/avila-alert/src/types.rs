@@ -75,7 +75,7 @@ impl Timestamp {
         let duration = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default();
-        
+
         Self {
             seconds: duration.as_secs(),
             nanos: duration.subsec_nanos(),
@@ -98,14 +98,14 @@ impl Timestamp {
         let total_secs = self.seconds;
         let days_since_epoch = total_secs / 86400;
         let seconds_today = total_secs % 86400;
-        
+
         let hours = seconds_today / 3600;
         let minutes = (seconds_today % 3600) / 60;
         let seconds = seconds_today % 60;
-        
+
         // Simple algorithm to calculate year, month, day
         let (year, month, day) = Self::days_to_ymd(days_since_epoch);
-        
+
         format!(
             "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
             year, month, day, hours, minutes, seconds
@@ -116,7 +116,7 @@ impl Timestamp {
     fn days_to_ymd(mut days: u64) -> (u32, u32, u32) {
         // Start from 1970
         let mut year = 1970;
-        
+
         loop {
             let days_in_year = if Self::is_leap_year(year) { 366 } else { 365 };
             if days < days_in_year {
@@ -125,13 +125,13 @@ impl Timestamp {
             days -= days_in_year;
             year += 1;
         }
-        
+
         let days_in_months = if Self::is_leap_year(year) {
             [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         } else {
             [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         };
-        
+
         let mut month = 1;
         for &days_in_month in &days_in_months {
             if days < days_in_month as u64 {
@@ -140,7 +140,7 @@ impl Timestamp {
             days -= days_in_month as u64;
             month += 1;
         }
-        
+
         let day = days + 1;
         (year, month, day as u32)
     }

@@ -18,7 +18,7 @@ fn main() {
     let manager2 = AlertManager::new();
     let formatter2 = DetailedFormatter::new();
     manager2.add_handler(Box::new(ConsoleHandler::new(formatter2)));
-    
+
     let alert = Alert::warning("Detailed message")
         .with_tag("example")
         .with_context("user", "alice");
@@ -41,7 +41,7 @@ fn main() {
         .with_tags(false)
         .with_context(false);
     manager4.add_handler(Box::new(ConsoleHandler::new(formatter4)));
-    
+
     let alert = Alert::info("Minimal format")
         .with_tag("ignored")
         .with_context("also", "ignored");
@@ -53,7 +53,7 @@ fn main() {
     let manager5 = AlertManager::new();
     let formatter5 = JsonFormatter::new();
     manager5.add_handler(Box::new(ConsoleHandler::new(formatter5)));
-    
+
     let alert = Alert::critical("JSON formatted")
         .with_tag("json")
         .with_context("format", "compact");
@@ -65,7 +65,7 @@ fn main() {
     let manager6 = AlertManager::new();
     let formatter6 = JsonFormatter::new().pretty();
     manager6.add_handler(Box::new(ConsoleHandler::new(formatter6)));
-    
+
     let alert = Alert::debug("Pretty JSON")
         .with_tag("json")
         .with_tag("pretty")

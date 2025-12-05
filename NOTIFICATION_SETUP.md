@@ -245,7 +245,7 @@ if (eventPayload.head_commit.message.includes('Merge branch')) {
 
 ### ❌ "SMTP Authentication failed"
 
-**Solução:** 
+**Solução:**
 - Verifique as credenciais
 - Se usar Gmail, verifique a "Senha de Aplicação"
 - Desabilite 2FA temporariamente para testar

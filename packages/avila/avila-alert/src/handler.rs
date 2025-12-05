@@ -185,13 +185,13 @@ impl Default for BufferHandler {
 impl AlertHandler for BufferHandler {
     fn handle(&self, alert: &Alert) {
         let mut buffer = self.buffer.lock().unwrap();
-        
+
         if let Some(max) = self.max_size {
             if buffer.len() >= max {
                 buffer.remove(0);
             }
         }
-        
+
         buffer.push(alert.clone());
     }
 }
@@ -232,7 +232,7 @@ mod tests {
     fn test_multi_handler() {
         let counter1 = Arc::new(AtomicUsize::new(0));
         let counter2 = Arc::new(AtomicUsize::new(0));
-        
+
         let c1 = counter1.clone();
         let c2 = counter2.clone();
 
@@ -245,9 +245,9 @@ mod tests {
             })));
 
         assert_eq!(handler.handler_count(), 2);
-        
+
         handler.handle(&Alert::warning("Test"));
-        
+
         assert_eq!(counter1.load(Ordering::SeqCst), 1);
         assert_eq!(counter2.load(Ordering::SeqCst), 1);
     }
@@ -304,7 +304,7 @@ mod tests {
         handler.handle(&Alert::info("Test 3"));
 
         assert_eq!(handler.len(), 2);
-        
+
         let alerts = handler.get_alerts();
         assert_eq!(alerts[0].message, "Test 2");
         assert_eq!(alerts[1].message, "Test 3");

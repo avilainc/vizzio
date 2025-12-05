@@ -9,7 +9,7 @@ pub struct AllocTester;
 
 impl AllocTester {
     /// Tests basic allocation and deallocation
-    pub fn test_alloc_dealloc<F, T>(mut alloc_fn: F, item: T) 
+    pub fn test_alloc_dealloc<F, T>(mut alloc_fn: F, item: T)
     where
         F: FnMut(T) -> Result<(), T>,
         T: Clone + Debug,
@@ -17,7 +17,7 @@ impl AllocTester {
         // Should succeed with capacity
         assert!(alloc_fn(item.clone()).is_ok(), "allocation should succeed");
     }
-    
+
     /// Tests capacity limits
     pub fn test_capacity<F, T>(mut alloc_fn: F, item: T, capacity: usize)
     where
@@ -27,19 +27,19 @@ impl AllocTester {
         // Fill to capacity
         for i in 0..capacity {
             assert!(
-                alloc_fn(item.clone()).is_ok(), 
-                "allocation {} should succeed", 
+                alloc_fn(item.clone()).is_ok(),
+                "allocation {} should succeed",
                 i
             );
         }
-        
+
         // Next allocation should fail
         assert!(
-            alloc_fn(item.clone()).is_err(), 
+            alloc_fn(item.clone()).is_err(),
             "allocation beyond capacity should fail"
         );
     }
-    
+
     /// Tests that operations maintain invariants
     pub fn test_invariants<F>(check_fn: F)
     where
@@ -79,7 +79,7 @@ impl TestData {
     pub fn integers(count: usize) -> impl Iterator<Item = i32> {
         (0..count as i32)
     }
-    
+
     /// Generates a sequence of test strings
     pub fn strings(count: usize) -> impl Iterator<Item = &'static str> {
         ["alpha", "beta", "gamma", "delta", "epsilon"]
@@ -88,7 +88,7 @@ impl TestData {
             .cycle()
             .take(count)
     }
-    
+
     /// Generates random-like data (deterministic)
     pub fn pseudo_random(seed: u32, count: usize) -> impl Iterator<Item = u32> {
         let mut state = seed;
@@ -107,7 +107,7 @@ impl MemPattern {
     pub unsafe fn fill(ptr: *mut u8, len: usize, pattern: u8) {
         core::ptr::write_bytes(ptr, pattern, len);
     }
-    
+
     /// Checks if memory matches a pattern
     pub unsafe fn check(ptr: *const u8, len: usize, pattern: u8) -> bool {
         for i in 0..len {
@@ -117,7 +117,7 @@ impl MemPattern {
         }
         true
     }
-    
+
     /// Fills with alternating pattern
     pub unsafe fn fill_alternating(ptr: *mut u8, len: usize) {
         for i in 0..len {
@@ -140,7 +140,7 @@ impl BenchStats {
             total_ns: 0,
         }
     }
-    
+
     pub fn avg_ns(&self) -> f64 {
         if self.iterations == 0 {
             0.0
@@ -148,7 +148,7 @@ impl BenchStats {
             self.total_ns as f64 / self.iterations as f64
         }
     }
-    
+
     pub fn throughput(&self, bytes: usize) -> f64 {
         if self.total_ns == 0 {
             0.0
@@ -174,9 +174,9 @@ macro_rules! should_panic {
 macro_rules! test_allocator {
     ($allocator:expr, $capacity:expr) => {{
         use $crate::test_helpers::AllocTester;
-        
+
         let mut alloc = $allocator;
-        
+
         // Test basic operations
         AllocTester::test_capacity(
             |item| alloc.push(item),
@@ -189,7 +189,7 @@ macro_rules! test_allocator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_drop_counter() {
         let mut count = 0;
@@ -198,16 +198,16 @@ mod tests {
         }
         assert_eq!(count, 1);
     }
-    
+
     #[test]
     fn test_data_generators() {
         let ints: Vec<_> = TestData::integers(5).collect();
         assert_eq!(ints, vec![0, 1, 2, 3, 4]);
-        
+
         let strings: Vec<_> = TestData::strings(3).collect();
         assert_eq!(strings, vec!["alpha", "beta", "gamma"]);
     }
-    
+
     #[test]
     fn test_mem_pattern() {
         let mut buffer = [0u8; 10];

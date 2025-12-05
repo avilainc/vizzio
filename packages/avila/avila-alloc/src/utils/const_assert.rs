@@ -66,7 +66,7 @@ pub const fn bytes_for_elements<T>(n: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_is_pow2() {
         assert!(is_pow2(1));
@@ -76,7 +76,7 @@ mod tests {
         assert!(!is_pow2(3));
         assert!(!is_pow2(6));
     }
-    
+
     #[test]
     fn test_next_pow2() {
         assert_eq!(next_pow2(1), 1);
@@ -85,14 +85,14 @@ mod tests {
         assert_eq!(next_pow2(5), 8);
         assert_eq!(next_pow2(15), 16);
     }
-    
+
     #[test]
     fn test_elements_fit() {
         assert_eq!(elements_fit::<u8>(10), 10);
         assert_eq!(elements_fit::<u32>(16), 4);
         assert_eq!(elements_fit::<u64>(32), 4);
     }
-    
+
     #[test]
     fn test_const_minmax() {
         assert_eq!(const_min(5, 10), 5);

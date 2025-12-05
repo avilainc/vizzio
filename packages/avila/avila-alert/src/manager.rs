@@ -109,7 +109,7 @@ mod tests {
         let manager = AlertManager::new();
         let counter1 = Arc::new(AtomicUsize::new(0));
         let counter2 = Arc::new(AtomicUsize::new(0));
-        
+
         let c1 = counter1.clone();
         let c2 = counter2.clone();
 
@@ -138,7 +138,7 @@ mod tests {
         })));
 
         assert_eq!(manager.handler_count(), 1);
-        
+
         manager.clear_handlers();
         assert_eq!(manager.handler_count(), 0);
     }

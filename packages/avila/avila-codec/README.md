@@ -98,7 +98,7 @@ fn main() {
     if simd::has_avx2() {
         let data = b"Large data to encode...";
         let mut output = vec![0u8; data.len() * 2];
-        
+
         unsafe {
             let written = simd::avx2::hex_encode_avx2(data, &mut output);
             println!("Encoded {} bytes", written);
@@ -109,7 +109,7 @@ fn main() {
     if simd::has_neon() {
         let data = b"Large data to encode...";
         let mut output = vec![0u8; data.len() * 2];
-        
+
         unsafe {
             let written = simd::neon::hex_encode_neon(data, &mut output);
             println!("Encoded {} bytes", written);

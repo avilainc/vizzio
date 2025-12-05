@@ -196,7 +196,7 @@ impl AlertFormatter for JsonFormatter {
             json.push_str(indent);
             json.push_str(&format!("\"context\":{}", space));
             json.push('{');
-            
+
             let mut first = true;
             for (key, value) in &alert.context {
                 if !first {
@@ -240,7 +240,7 @@ mod tests {
         let alert = Alert::info("Test message");
         let formatter = SimpleFormatter;
         let output = formatter.format(&alert);
-        
+
         assert!(output.contains("INFO"));
         assert!(output.contains("Test message"));
     }
@@ -250,10 +250,10 @@ mod tests {
         let alert = Alert::warning("Test")
             .with_tag("test")
             .with_context("user", "john");
-        
+
         let formatter = DetailedFormatter::new();
         let output = formatter.format(&alert);
-        
+
         assert!(output.contains("WARNING"));
         assert!(output.contains("test"));
         assert!(output.contains("user=john"));
@@ -264,7 +264,7 @@ mod tests {
         let alert = Alert::error("Test");
         let formatter = DetailedFormatter::new().with_emoji(false);
         let output = formatter.format(&alert);
-        
+
         assert!(!output.contains("❌"));
         assert!(output.contains("[ERROR]"));
     }
@@ -274,7 +274,7 @@ mod tests {
         let alert = Alert::info("Test").with_tag("json");
         let formatter = JsonFormatter::new();
         let output = formatter.format(&alert);
-        
+
         assert!(output.contains("\"level\""));
         assert!(output.contains("\"message\""));
         assert!(output.contains("\"tags\""));
@@ -285,7 +285,7 @@ mod tests {
         let alert = Alert::info("Test \"quoted\" string\nwith newline");
         let formatter = JsonFormatter::new();
         let output = formatter.format(&alert);
-        
+
         assert!(output.contains("\\\""));
         assert!(output.contains("\\n"));
     }
@@ -295,7 +295,7 @@ mod tests {
         let alert = Alert::warning("Simple warning");
         let formatter = CompactFormatter;
         let output = formatter.format(&alert);
-        
+
         assert_eq!(output, "WARNING: Simple warning");
     }
 }

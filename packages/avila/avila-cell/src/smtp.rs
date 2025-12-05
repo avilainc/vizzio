@@ -1,30 +1,25 @@
 //! SMTP (Simple Mail Transfer Protocol) - Envio de emails avançado
 
 use crate::{
-    message::Email, 
+    message::Email,
     auth::{AuthCapabilities, auth_plain, auth_login_username, auth_login_password, auth_xoauth2},
     tcp::TcpClient,
     Result,
     Error,
 };
-pub use crate::tls::SmtpSecurity;
-use std::time::Duration;/// SMTP client with advanced features
+use std::time::Duration;
+
+/// SMTP client with advanced features
 pub struct SmtpClient {
     client: TcpClient,
     capabilities: Option<AuthCapabilities>,
     authenticated: bool,
     timeout: Duration,
-    domain: String,
 }
 
 impl SmtpClient {
     /// Connect to SMTP server with hostname and port
     pub async fn connect(host: &str, port: u16) -> Result<Self> {
-        Self::connect_with_security(host, port, SmtpSecurity::None).await
-    }
-
-    /// Connect with specific security mode
-    pub async fn connect_with_security(host: &str, port: u16, security: SmtpSecurity) -> Result<Self> {
         use std::net::ToSocketAddrs;
 
         let addr = format!("{}:{}", host, port)
@@ -32,19 +27,13 @@ impl SmtpClient {
             .next()
             .ok_or_else(|| Error::Network("Could not resolve address".to_string()))?;
 
-        let mut client = TcpClient::connect(addr).await?;
-
-        // If using direct TLS (port 465), upgrade immediately
-        if security == SmtpSecurity::Tls {
-            client.upgrade_to_tls(host).await?;
-        }
+        let client = TcpClient::connect(addr).await?;
 
         let mut smtp = Self {
             client,
             capabilities: None,
             authenticated: false,
             timeout: Duration::from_secs(30),
-            domain: host.to_string(),
         };
 
         // Read banner
@@ -54,14 +43,7 @@ impl SmtpClient {
         }
 
         Ok(smtp)
-    }
-
-    /// Helper to connect to Gmail SMTP
-    pub async fn connect_gmail() -> Result<Self> {
-        Self::connect_with_security("smtp.gmail.com", 587, SmtpSecurity::StartTls).await
-    }
-
-    /// Sends EHLO and discovers capabilities
+    }    /// Sends EHLO and discovers capabilities
     pub async fn ehlo(&mut self, domain: &str) -> Result<()> {
         let cmd = format!("EHLO {}\r\n", domain);
         self.send(&cmd).await?;
@@ -72,19 +54,6 @@ impl SmtpClient {
         }
 
         self.capabilities = Some(AuthCapabilities::from_ehlo_response(&response));
-        Ok(())
-    }
-
-    /// Upgrade to TLS using STARTTLS command
-    pub async fn starttls(&mut self) -> Result<()> {
-        self.send("STARTTLS\r\n").await?;
-        let response = self.read_response().await?;
-
-        if !response.starts_with("220") {
-            return Err(Box::new(Error::Network(format!("STARTTLS failed: {}", response))));
-        }
-
-        self.client.upgrade_to_tls(&self.domain).await?;
         Ok(())
     }
 

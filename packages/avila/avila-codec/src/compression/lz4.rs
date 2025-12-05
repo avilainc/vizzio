@@ -1,7 +1,7 @@
 //! LZ4 compression implementation
 //!
 //! Fast compression algorithm for cache and networking.
-//! 
+//!
 //! This is a simplified LZ4 implementation that follows the basic block format:
 //! - Token byte: 4 bits for literal length, 4 bits for match length
 //! - Literals data
@@ -83,7 +83,7 @@ fn decode_length(data: &[u8], pos: &mut usize) -> Result<usize> {
 /// # Example
 /// ```
 /// use avila_codec::compression::lz4;
-/// 
+///
 /// let data = b"hello world hello world";
 /// let compressed = lz4::compress(data).unwrap();
 /// let decompressed = lz4::decompress(&compressed).unwrap();
@@ -96,7 +96,7 @@ pub fn compress(data: &[u8]) -> Result<Vec<u8>> {
 
     let mut output = Vec::new();
     let mut hash_table = [0usize; HASH_SIZE];
-    
+
     let mut pos = 0;
     let mut anchor = 0; // Start of current literal run
 
@@ -187,7 +187,7 @@ pub fn compress(data: &[u8]) -> Result<Vec<u8>> {
 /// # Example
 /// ```
 /// use avila_codec::compression::lz4;
-/// 
+///
 /// let original = b"test data test data";
 /// let compressed = lz4::compress(original).unwrap();
 /// let decompressed = lz4::decompress(&compressed).unwrap();

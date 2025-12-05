@@ -138,7 +138,7 @@ fn test_builder_missing_message() {
 #[test]
 fn test_timestamp_creation() {
     use avila_alert::Timestamp;
-    
+
     let ts = Timestamp::now();
     assert!(ts.as_secs() > 0);
 }
@@ -146,10 +146,10 @@ fn test_timestamp_creation() {
 #[test]
 fn test_timestamp_formatting() {
     use avila_alert::Timestamp;
-    
+
     let ts = Timestamp::now();
     let formatted = ts.format_iso8601();
-    
+
     assert!(formatted.contains("T"));
     assert!(formatted.ends_with("Z"));
     assert!(formatted.len() >= 19); // YYYY-MM-DDTHH:MM:SSZ
@@ -160,7 +160,7 @@ fn test_simple_formatter() {
     let alert = Alert::info("Test message");
     let formatter = SimpleFormatter;
     let output = formatter.format(&alert);
-    
+
     assert!(output.contains("INFO"));
     assert!(output.contains("Test message"));
 }
@@ -170,10 +170,10 @@ fn test_detailed_formatter() {
     let alert = Alert::warning("Test")
         .with_tag("test")
         .with_context("user", "john");
-    
+
     let formatter = DetailedFormatter::new();
     let output = formatter.format(&alert);
-    
+
     assert!(output.contains("WARNING"));
     assert!(output.contains("test"));
     assert!(output.contains("user=john"));
@@ -184,10 +184,10 @@ fn test_json_formatter() {
     let alert = Alert::error("JSON test")
         .with_tag("json")
         .with_context("format", "test");
-    
+
     let formatter = JsonFormatter::new();
     let output = formatter.format(&alert);
-    
+
     assert!(output.contains("\"level\""));
     assert!(output.contains("\"message\""));
     assert!(output.contains("ERROR"));
@@ -199,7 +199,7 @@ fn test_json_formatter_pretty() {
     let alert = Alert::info("Test");
     let formatter = JsonFormatter::new().pretty();
     let output = formatter.format(&alert);
-    
+
     assert!(output.contains("\n"));
     assert!(output.contains("  ")); // Indentation
 }
@@ -209,20 +209,20 @@ fn test_compact_formatter() {
     let alert = Alert::warning("Compact test");
     let formatter = CompactFormatter;
     let output = formatter.format(&alert);
-    
+
     assert_eq!(output, "WARNING: Compact test");
 }
 
 #[test]
 fn test_buffer_handler() {
     let buffer = BufferHandler::new();
-    
+
     buffer.handle(&Alert::info("Test 1"));
     buffer.handle(&Alert::warning("Test 2"));
     buffer.handle(&Alert::error("Test 3"));
-    
+
     assert_eq!(buffer.len(), 3);
-    
+
     let alerts = buffer.get_alerts();
     assert_eq!(alerts[0].message, "Test 1");
     assert_eq!(alerts[1].message, "Test 2");
@@ -232,13 +232,13 @@ fn test_buffer_handler() {
 #[test]
 fn test_buffer_handler_max_size() {
     let buffer = BufferHandler::new().with_max_size(2);
-    
+
     buffer.handle(&Alert::info("Test 1"));
     buffer.handle(&Alert::info("Test 2"));
     buffer.handle(&Alert::info("Test 3"));
-    
+
     assert_eq!(buffer.len(), 2);
-    
+
     let alerts = buffer.get_alerts();
     assert_eq!(alerts[0].message, "Test 2");
     assert_eq!(alerts[1].message, "Test 3");
@@ -247,59 +247,59 @@ fn test_buffer_handler_max_size() {
 #[test]
 fn test_manager_integration() {
     use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
-    
+
     let manager = AlertManager::new();
     let counter = Arc::new(AtomicUsize::new(0));
     let counter_clone = counter.clone();
-    
+
     manager.add_handler(Box::new(CallbackHandler::new(move |_| {
         counter_clone.fetch_add(1, Ordering::SeqCst);
     })));
-    
+
     manager.dispatch(Alert::info("Test 1"));
     manager.dispatch(Alert::warning("Test 2"));
     manager.dispatch(Alert::error("Test 3"));
-    
+
     assert_eq!(counter.load(Ordering::SeqCst), 3);
 }
 
 #[test]
 fn test_filter_handler_integration() {
     use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
-    
+
     let counter = Arc::new(AtomicUsize::new(0));
     let counter_clone = counter.clone();
-    
+
     let callback = CallbackHandler::new(move |_| {
         counter_clone.fetch_add(1, Ordering::SeqCst);
     });
-    
+
     let handler = FilterHandler::new(
         |alert| alert.level >= AlertLevel::Error,
         callback,
     );
-    
+
     handler.handle(&Alert::info("Should not count"));
     handler.handle(&Alert::warning("Should not count"));
     handler.handle(&Alert::error("Should count"));
     handler.handle(&Alert::critical("Should count"));
-    
+
     assert_eq!(counter.load(Ordering::SeqCst), 2);
 }
 
 #[test]
 fn test_macros() {
     use avila_alert::{info, warning, error};
-    
+
     let alert1 = info!("Test info");
     assert_eq!(alert1.level, AlertLevel::Info);
     assert_eq!(alert1.message, "Test info");
-    
+
     let value = 42;
     let alert2 = warning!("Value: {}", value);
     assert_eq!(alert2.level, AlertLevel::Warning);
     assert!(alert2.message.contains("42"));
-    
+
     let alert3 = error!("Error code: {}", 500);
     assert_eq!(alert3.level, AlertLevel::Error);
     assert!(alert3.message.contains("500"));
