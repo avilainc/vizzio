@@ -1,5 +1,5 @@
 //! Notification module for Vizzio Platform
-//! 
+//!
 //! Specialized email notifications for GitHub events using avila-cell SMTP capabilities
 
 use crate::{message::Email, smtp::SmtpClient, EmailAddress, Result};
@@ -63,15 +63,15 @@ impl NotificationClient {
         password: &str,
     ) -> Result<Self> {
         let mut client = SmtpClient::connect(smtp_host, smtp_port).await?;
-        
+
         // EHLO handshake
         client.ehlo("vizzio.dev").await?;
-        
+
         // Authenticate
         client.auth_plain(username, password).await?;
-        
+
         let from_address = EmailAddress::new(from_email)?;
-        
+
         Ok(Self {
             smtp_client: client,
             from_address,
@@ -85,7 +85,7 @@ impl NotificationClient {
         recipient: &Partner,
     ) -> Result<()> {
         let to_address = EmailAddress::new(&recipient.email)?;
-        
+
         let subject = format!(
             "🔔 Vizzio Platform - {} - {}",
             event.event_type,
@@ -211,33 +211,33 @@ impl NotificationClient {
             <h1>📊 Vizzio Platform</h1>
             <p>Notificação de Atualização do Repositório</p>
         </div>
-        
+
         <div class="content">
             <p>Olá <strong>{}</strong>,</p>
             <p style="margin-top: 15px;">Uma nova atualização foi realizada no repositório Vizzio Platform!</p>
-            
+
             <span class="badge">{}</span>
-            
+
             <div class="info-block">
                 <label>📦 Repositório:</label>
                 <span class="value">{}</span>
             </div>
-            
+
             <div class="info-block">
                 <label>👤 Autor:</label>
                 <span class="value">{}</span>
             </div>
-            
+
             <div class="info-block">
                 <label>⏰ Data:</label>
                 <span class="value">{}</span>
             </div>
-            
+
             {}
-            
+
             <a href="{}" class="btn">Ver Detalhes no GitHub →</a>
         </div>
-        
+
         <div class="footer">
             <p>© 2025 Vizzio Platform - Todos os direitos reservados</p>
             <p>Você está recebendo este email como sócio do projeto.</p>
@@ -279,7 +279,7 @@ Você está recebendo este email como sócio do projeto."#,
     /// Generate event-specific details HTML
     fn generate_event_details(&self, event_type: &GitHubEventType, details: &HashMap<String, String>) -> String {
         let mut html = String::new();
-        
+
         match event_type {
             GitHubEventType::Push => {
                 if let Some(branch) = details.get("branch") {
@@ -334,7 +334,7 @@ Você está recebendo este email como sócio do projeto."#,
             },
             _ => {}
         }
-        
+
         html
     }
 

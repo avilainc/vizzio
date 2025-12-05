@@ -66,15 +66,14 @@ SMTP_PORT: "587"
 SMTP_USER: "seu-email@gmail.com"
 SMTP_PASSWORD: "app-password-gerado"
 
-PARTNERS_EMAIL: "socio1@example.com"
-PARTNERS_NAME: "Sócio 1 do Vizzio"
+PARTNER_1_EMAIL: "nicolas@avila.inc"
+PARTNER_1_NAME: "Nicolas"
 
-PARTNERS_EMAIL_2: "socio2@example.com"
-PARTNERS_NAME_2: "Sócio 2 do Vizzio"
+PARTNER_2_EMAIL: "marcelosavazzi1@gmail.com"
+PARTNER_2_NAME: "Marcelo Savazzi"
 
-# Opcional: Mais sócios
-PARTNERS_EMAIL_3: "socio3@example.com"
-PARTNERS_NAME_3: "Sócio 3 do Vizzio"
+PARTNER_3_EMAIL: "rafaelochiussi@hotmail.com"
+PARTNER_3_NAME: "Rafael Ochiussi"
 ```
 
 ### Passo 2: Workflow Automático
@@ -97,15 +96,15 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Send Partner Notifications
         run: node .github/scripts/send-emails.js
         env:
@@ -230,8 +229,7 @@ git push origin main
 
 ```
 De:    seu-email@gmail.com
-Para:  socio1@example.com
-Cc:    socio2@example.com
+Para:  nicolas@avila.inc, marcelosavazzi1@gmail.com, rafaelochiussi@hotmail.com
 Assunto: 🔔 Vizzio Platform - 📤 PUSH - avilainc/vizzio
 
 ┌────────────────────────────────────┐
@@ -352,6 +350,6 @@ cargo run --example partner_notifications
 
 ---
 
-**Status:** ✅ Completamente Configurado e Testado  
-**Versão:** 1.0.0  
+**Status:** ✅ Completamente Configurado e Testado
+**Versão:** 1.0.0
 **Data:** Janeiro 2025

@@ -58,12 +58,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 👥 Define partners/stakeholders
     let partners = vec![
         Partner {
-            name: "Sócio 1".to_string(),
-            email: "socio1@example.com".to_string(),
+            name: "Nicolas".to_string(),
+            email: "nicolas@avila.inc".to_string(),
         },
         Partner {
-            name: "Sócio 2".to_string(),
-            email: "socio2@example.com".to_string(),
+            name: "Marcelo Savazzi".to_string(),
+            email: "marcelosavazzi1@gmail.com".to_string(),
+        },
+        Partner {
+            name: "Rafael Ochiussi".to_string(),
+            email: "rafaelochiussi@hotmail.com".to_string(),
         },
     ];
 

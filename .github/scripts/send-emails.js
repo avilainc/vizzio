@@ -5,12 +5,16 @@ const path = require('path');
 // Configuração dos parceiros
 const PARTNERS = [
   {
-    email: process.env.PARTNER_1_EMAIL || 'socio1@example.com',
-    name: process.env.PARTNER_1_NAME || 'Sócio 1'
+    email: process.env.PARTNER_1_EMAIL || 'nicolas@avila.inc',
+    name: process.env.PARTNER_1_NAME || 'Nicolas'
   },
   {
-    email: process.env.PARTNER_2_EMAIL || 'socio2@example.com',
-    name: process.env.PARTNER_2_NAME || 'Sócio 2'
+    email: process.env.PARTNER_2_EMAIL || 'marcelosavazzi1@gmail.com',
+    name: process.env.PARTNER_2_NAME || 'Marcelo Savazzi'
+  },
+  {
+    email: process.env.PARTNER_3_EMAIL || 'rafaelochiussi@hotmail.com',
+    name: process.env.PARTNER_3_NAME || 'Rafael Ochiussi'
   }
 ];
 

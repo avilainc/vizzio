@@ -339,8 +339,8 @@ git push origin master  # Dispara GitHub Actions
 
 ---
 
-**Versão:** 1.0.0  
-**Status:** ✅ COMPLETO E TESTADO  
-**Data:** Janeiro 2025  
-**Responsável:** Vizzio Platform Team  
+**Versão:** 1.0.0
+**Status:** ✅ COMPLETO E TESTADO
+**Data:** Janeiro 2025
+**Responsável:** Vizzio Platform Team
 **GitHub:** https://github.com/avilainc/vizzio

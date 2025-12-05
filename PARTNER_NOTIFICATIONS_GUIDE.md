@@ -213,10 +213,12 @@ Triggers:
 | `SMTP_PORT` | SMTP port | `587` |
 | `SMTP_USER` | SMTP username/email | `seu-email@gmail.com` |
 | `SMTP_PASSWORD` | SMTP password/app-password | `sua-app-password` |
-| `PARTNERS_EMAIL` | Partner 1 email | `socio1@example.com` |
-| `PARTNERS_NAME` | Partner 1 name | `Sócio 1` |
-| `PARTNERS_EMAIL_2` | Partner 2 email | `socio2@example.com` |
-| `PARTNERS_NAME_2` | Partner 2 name | `Sócio 2` |
+| `PARTNER_1_EMAIL` | Partner 1 email | `nicolas@avila.inc` |
+| `PARTNER_1_NAME` | Partner 1 name | `Nicolas` |
+| `PARTNER_2_EMAIL` | Partner 2 email | `marcelosavazzi1@gmail.com` |
+| `PARTNER_2_NAME` | Partner 2 name | `Marcelo Savazzi` |
+| `PARTNER_3_EMAIL` | Partner 3 email | `rafaelochiussi@hotmail.com` |
+| `PARTNER_3_NAME` | Partner 3 name | `Rafael Ochiussi` |
 
 #### Passo 2: Gmail (Exemplo)
 
@@ -285,11 +287,12 @@ cargo run --example partner_notifications
 ✅ Conectado com sucesso!
 
 👥 Sócios a serem notificados:
-   - Sócio 1 (socio1@example.com)
-   - Sócio 2 (socio2@example.com)
+   - Nicolas (nicolas@avila.inc)
+   - Marcelo Savazzi (marcelosavazzi1@gmail.com)
+   - Rafael Ochiussi (rafaelochiussi@hotmail.com)
 
 📤 Exemplo 1: Notificação de PUSH
-   📧 Enviando para Sócio 1...
+   📧 Enviando para Nicolas...
    ✅ Email enviado com sucesso!
    📧 Enviando para Sócio 2...
    ✅ Email enviado com sucesso!
@@ -327,9 +330,9 @@ Parceiros receberão automaticamente:
 
 ```rust
 use avila_cell::notification::{
-    NotificationClient, 
-    GitHubEventNotification, 
-    GitHubEventType, 
+    NotificationClient,
+    GitHubEventNotification,
+    GitHubEventType,
     Partner
 };
 use std::collections::HashMap;
@@ -365,12 +368,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3. Enviar para sócios
     let partners = vec![
         Partner {
-            name: "Sócio 1".to_string(),
-            email: "socio1@example.com".to_string(),
+            name: "Nicolas".to_string(),
+            email: "nicolas@avila.inc".to_string(),
         },
         Partner {
-            name: "Sócio 2".to_string(),
-            email: "socio2@example.com".to_string(),
+            name: "Marcelo Savazzi".to_string(),
+            email: "marcelosavazzi1@gmail.com".to_string(),
+        },
+        Partner {
+            name: "Rafael Ochiussi".to_string(),
+            email: "rafaelochiussi@hotmail.com".to_string(),
         },
     ];
 
@@ -627,6 +634,6 @@ Para perguntas ou issues relacionadas:
 
 ---
 
-**Versão:** 1.0.0  
-**Última atualização:** Janeiro 2025  
+**Versão:** 1.0.0
+**Última atualização:** Janeiro 2025
 **Status:** ✅ Produção
