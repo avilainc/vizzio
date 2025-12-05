@@ -1,0 +1,15 @@
+{
+  "name": "@vizzio/integrations",
+  "version": "1.0.0",
+  "private": true,
+  "description": "External integrations - Salesforce, HubSpot, Slack, etc",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@vizzio/core": "*",
+    "axios": "^1.4.0"
+  }
+}

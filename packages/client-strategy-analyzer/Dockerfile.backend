@@ -1,0 +1,13 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+RUN npm install --omit=dev --legacy-peer-deps
+
+# Create a simple index.js that listens on port 3000
+RUN mkdir -p packages/backend && echo "const http = require('http');\nhttp.createServer((req, res) => {\n  res.writeHead(200);\n  res.end('Vizzio Backend Running');\n}).listen(3000);\nconsole.log('Backend running on port 3000');" > packages/backend/server.js
+
+EXPOSE 3000
+
+CMD ["node", "packages/backend/server.js"]

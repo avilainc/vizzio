@@ -1,0 +1,38 @@
+{
+  "name": "@vizzio/client-strategy-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo - Client Strategy Analyzer System",
+  "workspaces": [
+    "packages/backend",
+    "packages/frontend",
+    "packages/shared",
+    "packages/cli",
+    "tools/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:backend": "npm run dev -w packages/backend",
+    "dev:frontend": "npm run dev -w packages/frontend",
+    "build": "npm run build --workspaces --if-present",
+    "build:backend": "npm run build -w packages/backend",
+    "build:frontend": "npm run build -w packages/frontend",
+    "test": "npm run test --workspaces --if-present",
+    "test:watch": "npm run test:watch --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "npm run clean --workspaces --if-present && rimraf node_modules dist",
+    "install:all": "npm install",
+    "setup": "npm install && npm run build"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

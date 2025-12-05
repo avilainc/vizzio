@@ -1,0 +1,19 @@
+{
+  "name": "@vizzio/cli",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CLI tool for Vizzio platform",
+  "main": "dist/index.js",
+  "bin": {
+    "vizzio": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@vizzio/core": "*",
+    "commander": "^11.0.0",
+    "chalk": "^5.0.0"
+  }
+}

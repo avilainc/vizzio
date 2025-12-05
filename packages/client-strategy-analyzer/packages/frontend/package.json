@@ -1,0 +1,23 @@
+{
+  "name": "@vizzio/frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vizzio Frontend Dashboard",
+  "scripts": {
+    "dev": "next dev || tsc",
+    "build": "tsc",
+    "start": "next start || echo 'Next.js not available'",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "next": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

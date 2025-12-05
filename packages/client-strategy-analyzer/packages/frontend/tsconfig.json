@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "target": "es2020",
+        "lib": [
+            "es2020",
+            "dom",
+            "dom.iterable"
+        ],
+        "jsx": "react-jsx",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "baseUrl": ".",
+        "paths": {
+            "@vizzio/*": [
+                "../*/src"
+            ]
+        }
+    },
+    "include": [
+        "src",
+        "next.config.js"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@vizzio/shortcuts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shortcuts and quick actions system",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@vizzio/core": "*"
+  }
+}

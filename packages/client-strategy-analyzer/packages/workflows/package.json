@@ -1,0 +1,17 @@
+{
+  "name": "@vizzio/workflows",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workflow engine for automation",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@vizzio/core": "*",
+    "bull": "^4.11.0",
+    "axios": "^1.4.0"
+  }
+}

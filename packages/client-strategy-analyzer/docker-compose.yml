@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # MongoDB - Base de Dados
+  mongodb:
+    image: mongo:6
+    container_name: vizzio-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - vizzio-network
+
+  # Redis - Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: vizzio-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - vizzio-network
+
+  # RabbitMQ - Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: vizzio-rabbitmq
+    ports:
+      - "5672:5672"      # AMQP
+      - "15672:15672"    # Management
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password123
+    networks:
+      - vizzio-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  vizzio-network:
+    driver: bridge

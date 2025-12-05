@@ -1,0 +1,48 @@
+{
+  "app": {
+    "title": "Client Strategy Analyzer",
+    "subtitle": "Intelligent client case analysis system"
+  },
+  "nav": {
+    "cases": "📋 Cases",
+    "newCase": "➕ New Case"
+  },
+  "dashboard": {
+    "title": "Cases Under Analysis",
+    "emptyState": "No cases found"
+  },
+  "form": {
+    "title": "Register New Case",
+    "clientName": "Client Name",
+    "clientEmail": "Email",
+    "clientPhone": "Phone",
+    "clientCompany": "Company",
+    "caseDescription": "Case Description",
+    "category": "Category",
+    "objectives": "Objectives",
+    "challenges": "Challenges",
+    "budget": "Budget ($)",
+    "timeline": "Timeline",
+    "submit": "Create Case",
+    "success": "Case created successfully! 🎉",
+    "error": "Error creating case. Please try again."
+  },
+  "status": {
+    "draft": "Draft",
+    "analyzing": "Analyzing",
+    "analyzed": "Analyzed",
+    "proposal_sent": "Proposal Sent",
+    "completed": "Completed"
+  },
+  "actions": {
+    "analyze": "Analyze",
+    "sendProposal": "Send Proposal",
+    "view": "View"
+  },
+  "messages": {
+    "analyzing": "Analyzing case...",
+    "sending": "Sending proposal...",
+    "success": "Operation completed successfully!",
+    "error": "Error performing operation"
+  }
+}
