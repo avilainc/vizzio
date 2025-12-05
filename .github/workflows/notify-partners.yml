@@ -1,0 +1,43 @@
+name: Notificar Sócios sobre Atualizações
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    types: [ opened, closed, synchronize ]
+  issues:
+    types: [ opened, closed ]
+
+env:
+  PARTNER_1_EMAIL: socio1@example.com
+  PARTNER_1_NAME: Sócio 1
+  PARTNER_2_EMAIL: socio2@example.com
+  PARTNER_2_NAME: Sócio 2
+
+jobs:
+  notify-partners:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install nodemailer dotenv
+
+    - name: Send Notification Emails
+      run: node .github/scripts/send-emails.js
+      env:
+        SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        SMTP_USER: ${{ secrets.SMTP_USER }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        SEND_FROM: ${{ secrets.SEND_FROM }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
