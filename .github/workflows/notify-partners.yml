@@ -1,43 +1,50 @@
-name: Notificar Sócios sobre Atualizações
+name: Notify Partners
 
 on:
   push:
     branches: [ master, main, develop ]
   pull_request:
-    types: [ opened, closed, synchronize ]
+    types: [ opened, synchronize, reopened ]
   issues:
-    types: [ opened, closed ]
-
-env:
-  PARTNER_1_EMAIL: socio1@example.com
-  PARTNER_1_NAME: Sócio 1
-  PARTNER_2_EMAIL: socio2@example.com
-  PARTNER_2_NAME: Sócio 2
+    types: [ opened ]
+  release:
+    types: [ published ]
 
 jobs:
   notify-partners:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-    - name: Install dependencies
-      run: npm install nodemailer dotenv
+      - name: Install dependencies
+        run: npm install nodemailer dotenv
 
-    - name: Send Notification Emails
-      run: node .github/scripts/send-emails.js
-      env:
-        SMTP_HOST: ${{ secrets.SMTP_HOST }}
-        SMTP_PORT: ${{ secrets.SMTP_PORT }}
-        SMTP_USER: ${{ secrets.SMTP_USER }}
-        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        SEND_FROM: ${{ secrets.SEND_FROM }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Send Notification Emails
+        env:
+          PARTNER_1_EMAIL: ${{ secrets.PARTNER_1_EMAIL }}
+          PARTNER_1_NAME: ${{ secrets.PARTNER_1_NAME }}
+          PARTNER_2_EMAIL: ${{ secrets.PARTNER_2_EMAIL }}
+          PARTNER_2_NAME: ${{ secrets.PARTNER_2_NAME }}
+          PARTNER_3_EMAIL: ${{ secrets.PARTNER_3_EMAIL }}
+          PARTNER_3_NAME: ${{ secrets.PARTNER_3_NAME }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: node .github/scripts/send-emails.js
