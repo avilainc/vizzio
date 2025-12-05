@@ -1,0 +1,154 @@
+# Deriax Configuration File
+# Advanced Reverse Engineering Tool
+
+[analysis]
+# Analysis timeout in seconds
+timeout = 300
+
+# Maximum memory usage
+max_memory = "2GB"
+
+# Number of parallel threads
+parallel_threads = 4
+
+# Default analysis profile
+default_profile = "normal"
+
+[analysis.profiles.fast]
+deep_scan = false
+signature_strictness = "low"
+sandbox_enabled = false
+ml_detection = false
+
+[analysis.profiles.normal]
+deep_scan = false
+signature_strictness = "medium"
+sandbox_enabled = false
+ml_detection = true
+
+[analysis.profiles.deep]
+deep_scan = true
+signature_strictness = "high"
+sandbox_enabled = true
+ml_detection = true
+
+[analysis.profiles.paranoid]
+deep_scan = true
+signature_strictness = "high"
+sandbox_enabled = true
+ml_detection = true
+threat_intel = true
+symbolic_execution = true
+
+[malware]
+# Signature update interval
+signature_update_interval = "24h"
+
+# YARA rules path
+yara_rules_path = "./rules/"
+
+# Enable heuristic detection
+heuristic_detection = true
+
+# ML model path
+ml_model_path = "./models/malware_classifier.onnx"
+
+[vulnerability]
+# Enable vulnerability scanning
+enabled = true
+
+# Scan depth
+scan_depth = "medium"
+
+# Check for known CVEs
+cve_check = true
+
+[sandbox]
+# Sandbox type: qemu, virtualbox, docker
+sandbox_type = "docker"
+
+# Sandbox timeout in seconds
+timeout = 600
+
+# Network isolation
+network_isolation = true
+
+# File system isolation
+fs_isolation = true
+
+[threat_intel]
+# Enable threat intelligence
+enabled = false
+
+# VirusTotal API key
+virustotal_api_key = ""
+
+# AlienVault OTX API key
+otx_api_key = ""
+
+# MISP instance
+misp_url = ""
+misp_api_key = ""
+
+# Cache TTL in hours
+cache_ttl = 24
+
+[cache]
+# Cache type: memory, disk, redis
+cache_type = "memory"
+
+# Maximum cache size in MB
+max_size_mb = 512
+
+# Cache directory (for disk cache)
+cache_dir = "./cache"
+
+# Redis connection (for redis cache)
+redis_url = "redis://localhost:6379"
+
+[logging]
+# Log level: debug, info, warn, error
+level = "info"
+
+# Log file path
+log_file = "./logs/deriax.log"
+
+# Enable structured logging
+structured = true
+
+[web]
+# Enable web interface
+enabled = false
+
+# Host and port
+host = "127.0.0.1"
+port = 8080
+
+# Enable CORS
+cors_enabled = false
+
+# Max upload size in MB
+max_upload_size_mb = 100
+
+[plugins]
+# Plugin directory
+plugin_dir = "./plugins"
+
+# Auto-load plugins on startup
+auto_load = true
+
+# Enable plugin sandboxing
+sandbox_enabled = true
+
+[reporting]
+# Default report format: json, html, pdf, markdown
+default_format = "json"
+
+# Report output directory
+output_dir = "./reports"
+
+# Include screenshots
+include_screenshots = false
+
+# Include full disassembly
+include_disassembly = false

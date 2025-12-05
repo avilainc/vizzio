@@ -1,0 +1,22 @@
+[package]
+name = "avila-arrow-python"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "avila_arrow"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.20", features = ["extension-module"] }
+avila-arrow = { path = ".." }
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "avila-arrow"
+version = "0.1.0"
+description = "Python bindings for avila-arrow"
+requires-python = ">=3.8"

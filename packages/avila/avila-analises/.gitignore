@@ -1,0 +1,36 @@
+# Adicionar ao .gitignore
+/target/
+**/*.rs.bk
+*.pdb
+
+# Configuração
+.env
+config.local.toml
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Benchmarks
+/target/criterion/
+
+# Coverage
+tarpaulin-report.html
+cobertura.xml
+
+# Documentação gerada
+/target/doc/
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/

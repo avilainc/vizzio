@@ -1,0 +1,69 @@
+[package]
+name = "avila-cli"
+version = "1.1.0"
+edition = "2021"
+authors = ["Ávila CLI Team"]
+description = "Zero-dependency command-line argument parser for Rust with advanced features"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/vizzio/avila-cli"
+keywords = ["cli", "parser", "command-line", "argument", "no-std"]
+categories = ["command-line-interface", "parsing"]
+
+[dependencies]
+# Zero dependencies - pure Rust std library only
+
+[dev-dependencies]
+# No dev dependencies needed for examples
+
+[lib]
+name = "avila_cli"
+path = "src/lib.rs"
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[[example]]
+name = "subcommands"
+path = "examples/subcommands.rs"
+
+[[example]]
+name = "multiple_values"
+path = "examples/multiple_values.rs"
+
+[[example]]
+name = "validators"
+path = "examples/validators.rs"
+
+[[example]]
+name = "validators_advanced"
+path = "examples/validators_advanced.rs"
+
+[[example]]
+name = "macros"
+path = "examples/macros.rs"
+
+[[example]]
+name = "env_config"
+path = "examples/env_config.rs"
+
+[[example]]
+name = "completion"
+path = "examples/completion.rs"
+
+[[example]]
+name = "error_suggestions"
+path = "examples/error_suggestions.rs"
+
+[[example]]
+name = "help_demo"
+path = "examples/help_demo.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0

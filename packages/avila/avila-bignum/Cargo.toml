@@ -1,0 +1,52 @@
+[package]
+name = "avila-bignum"
+version = "0.1.0"
+edition = "2021"
+authors = ["Avila Team"]
+description = "High-performance arbitrary precision arithmetic library for cryptography"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/avilaops/avila-bignum"
+keywords = ["bignum", "bigint", "cryptography", "rsa", "arithmetic"]
+categories = ["algorithms", "cryptography", "mathematics", "no-std"]
+readme = "README.md"
+
+[dependencies]
+# Core library has ZERO dependencies - 100% pure Rust
+# Optional features can be enabled as needed:
+# serde = { version = "1.0", optional = true, default-features = false }
+# zeroize = { version = "1.7", optional = true, default-features = false }
+
+[dev-dependencies]
+# Only for testing and benchmarking (not part of the library)
+# Uncomment these when needed:
+# criterion = { version = "0.5", features = ["html_reports"] }
+# proptest = "1.4"
+# hex-literal = "0.4"
+
+[features]
+default = ["std"]
+std = []
+# alloc = []
+# Future optional features:
+# serde = ["dep:serde"]
+# zeroize = ["dep:zeroize"]
+# crypto = []  # Enable advanced crypto features
+
+# Benchmarks are optional - comment out if not needed
+# [[bench]]
+# name = "arithmetic"
+# harness = false
+
+# [[bench]]
+# name = "crypto"
+# harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.bench]
+opt-level = 3
+lto = true
+codegen-units = 1

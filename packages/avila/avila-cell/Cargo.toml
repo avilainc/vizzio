@@ -1,0 +1,45 @@
+[workspace]
+members = ["avila-cell-core"]
+resolver = "2"
+
+[package]
+name = "avila-cell"
+version = "0.1.0"
+edition = "2021"
+authors = ["Avila Team"]
+description = "Email protocols (SMTP, IMAP, POP3) with TLS support"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/avila/avila-cell"
+
+[dependencies]
+# Core
+avila-cell-core = { path = "./avila-cell-core" }
+tokio = { version = "1.35", features = ["full"] }
+
+# TLS Support
+rustls = "0.23"
+tokio-rustls = "0.26"
+webpki-roots = "0.26"
+rustls-pemfile = "2.0"
+
+# Async runtime
+futures = "0.3"
+
+# Encoding & parsing
+base64 = "0.22"
+quoted_printable = "0.5"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[features]
+default = ["tls"]
+tls = []
