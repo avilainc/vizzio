@@ -1,0 +1,12 @@
+[package]
+name = "avila-dataframe"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Placeholder dataframe crate for local workspace builds"
+
+[lib]
+name = "avila_dataframe"
+path = "src/lib.rs"
+
+[dependencies]

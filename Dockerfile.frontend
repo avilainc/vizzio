@@ -1,0 +1,41 @@
+# Build stage
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY packages/*/package.json packages/*/
+COPY tsconfig.json .
+
+# Install dependencies
+RUN npm install --frozen-lockfile
+
+# Copy source
+COPY packages ./packages
+
+# Build
+RUN npm run build
+
+# Runtime stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/frontend/.next ./packages/frontend/.next
+COPY --from=builder /app/packages/frontend/public ./packages/frontend/public
+COPY --from=builder /app/packages/frontend/package*.json ./packages/frontend/
+COPY --from=builder /app/package*.json ./
+
+# Environment
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Expose port
+EXPOSE 3000
+
+# Run Next.js
+WORKDIR /app/packages/frontend
+CMD ["npm", "start"]

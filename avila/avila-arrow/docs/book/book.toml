@@ -1,0 +1,14 @@
+[book]
+title = "Avila Arrow Guide"
+authors = ["Avila Team"]
+language = "en"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "book"
+
+[output.html]
+theme = "theme"
+default-theme = "light"
+git-repository-url = "https://github.com/your-org/avila-arrow"

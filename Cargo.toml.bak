@@ -1,0 +1,259 @@
+[workspace]
+resolver = "2"
+
+# VIZZIO - Platform Completa de Automação Empresarial
+# Integra: Avila (130+ crates Rust) + Avx (23 crates) + Node.js packages
+
+# ===== AVILA - Infraestrutura Core (130+ crates) =====
+members = [
+    # AI & Copilot
+    "avila/avila-ai-proxy",
+    "avila/avila-copilot-context",
+    "avila/avila-copilot-lsp",
+    "avila/avila-copilot-model-storage",
+    "avila/avila-copilot-tokenizer",
+
+    # Core Infrastructure
+    "avila/avila-core-workspace",
+    "avila/avila-error",
+    "avila/avila-errors-derive",
+    "avila/avila-async",
+    "avila/avila-future",
+    "avila/avila-sync",
+    "avila/avila-time",
+    "avila/avila-alert",
+    "avila/avila-telemetry",
+    "avila/avila-tracing",
+    "avila/avila-log",
+    "avila/avila-logger",
+    "avila/avila-metrics",
+    "avila/avila-monitor",
+
+    # Data Structures & Algorithms
+    "avila/avila-buffer",
+    "avila/avila-cache",
+    "avila/avila-dataframe",
+    "avila/avila-ndarray",
+    "avila/avila-hash",
+    "avila/avila-regex",
+    "avila/avila-codec",
+    "avila/avila-compress",
+    "avila/avila-serialize",
+    "avila/avila-serde",
+
+    # Networking & Distributed Systems
+    "avila/avila-http",
+    "avila/avila-grpc",
+    "avila/avila-tcp",
+    "avila/avila-udp",
+    "avila/avila-websocket",
+    "avila/avila-tls",
+    "avila/avila-quic",
+    "avila/avila-quinn",
+    "avila/avila-dns",
+    "avila/avila-proxy",
+    "avila/avila-loadbalancer",
+    "avila/avila-service-mesh",
+    "avila/avila-gossip",
+    "avila/avila-distributed-system",
+    "avila/avila-election",
+    "avila/avila-raft",
+    "avila/avila-replication",
+
+    # Cryptography & Security
+    "avila/avila-crypto",
+    "avila/avila-pki",
+    "avila/avila-jwt",
+    "avila/avila-oauth",
+    "avila/avila-kdf",
+    "avila/avila-mac",
+    "avila/avila-signature",
+    "avila/avila-post-quantum",
+    "avila/avila-zkp",
+    "avila/avila-onion-routing",
+    "avila/avila-stealth",
+
+    # Math & Scientific Computing
+    "avila/avila-math",
+    "avila/avila-linalg",
+    "avila/avila-numeric",
+    "avila/avila-bignum",
+    "avila/avila-fft",
+    "avila/avila-finite-fields",
+    "avila/avila-curve",
+    "avila/avila-prime",
+    "avila/avila-reduction",
+    "avila/avila-atom",
+    "avila/avila-molecule",
+    "avila/avila-vec3d",
+
+    # ML & AI
+    "avila/avila-ml",
+    "avila/avila-optimizer",
+    "avila/avila-quantum",
+
+    # Clustering & Parallelization
+    "avila/avila-clustering",
+    "avila/avila-parallel",
+    "avila/avila-rayon-simple",
+    "avila/avila-pool",
+    "avila/avila-partition",
+    "avila/avila-shard",
+
+    # Geospatial
+    "avila/avila-geo",
+    "avila/avila-geo-workspace",
+    "avila/avila-location",
+    "avila/avila-gis-desktop",
+
+    # Graphics & Visualization
+    "avila/avila-gltf",
+    "avila/avila-mesh",
+    "avila/avila-tesselation",
+    "avila/avila-image",
+
+    # Web & Frontend
+    "avila/avila-browser",
+    "avila/avila-webframework",
+    "avila/avila-web",
+    "avila/avila-frontend",
+    "avila/avila-terminal",
+    "avila/avila-term",
+
+    # BIM & Building Information Modeling
+    "avila/avila-bim",
+
+    # Database
+    "avila/aviladb",
+    "avila/aviladb-core",
+    "avila/avila-db",
+
+    # CLI & Development Tools
+    "avila/avila-cli",
+    "avila/avila-config",
+
+    # Utilities
+    "avila/avila-alloc",
+    "avila/avila-arrow",
+    "avila/avila-arxis",
+    "avila/avila-analyze",
+    "avila/avila-cell",
+    "avila/avila-coordinator",
+    "avila/avila-id",
+    "avila/avila-meta",
+    "avila/avila-metadata-extractor",
+    "avila/avila-modular",
+    "avila/avila-organism",
+    "avila/avila-organ",
+    "avila/avila-orchestrator",
+    "avila/avila-primitives",
+    "avila/avila-rand",
+    "avila/avila-rand-simple",
+    "avila/avila-random",
+    "avila/avila-tokenizer",
+    "avila/avila-tissue",
+    "avila/avila-validate",
+    "avila/avila-vizzio",
+
+    # Framework
+    "avila/avila-framework",
+
+    # ===== AVX - Advanced Vector Extensions (23 crates) =====
+    "avx/avx-api-core",
+    "avx/avx-civil-vr",
+    "avx/avx-cli",
+    "avx/avx-config",
+    "avx/avx-conv1d",
+    "avx/avx-conv2d",
+    "avx/avx-conv3d",
+    "avx/avx-conv4d",
+    "avx/avx-copilot-ai",
+    "avx/avx-events",
+    "avx/avx-gateway",
+    "avx/avx-gpu",
+    "avx/avx-gpu-backends",
+    "avx/avx-gpu-compiler",
+    "avx/avx-gpu-core",
+    "avx/avx-gpu-macros",
+    "avx/avx-gpu-runtime",
+    "avx/avx-gpu-std",
+    "avx/avx-http",
+    "avx/avx-image",
+    "avx/avx-quantum-render",
+    "avx/avx-runtime",
+    "avx/avx-telemetry",
+]
+
+# ===== Node.js packages gerenciados por npm workspaces =====
+# Ver package.json para Node.js configuration
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+authors = ["Vizzio Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/avilainc/vizzio"
+homepage = "https://vizzio.com"
+documentation = "https://docs.vizzio.com"
+
+# Dependências globais compartilhadas
+[workspace.dependencies]
+# Async & Runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+pin-project = "1.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+protobuf = "2.28"
+
+# Cryptography
+ring = "0.17"
+sha2 = "0.10"
+hmac = "0.12"
+aes = "0.8"
+rand = "0.8"
+
+# Web & HTTP
+hyper = { version = "0.14", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+tonic = "0.10"
+prost = "0.12"
+
+# Logging & Tracing
+tracing = "0.1"
+tracing-subscriber = "0.3"
+log = "0.4"
+env_logger = "0.11"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres"] }
+mongodb = "2.7"
+redis = "0.24"
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+structopt = "0.3"
+
+# Testing
+criterion = "0.5"
+proptest = "1.4"
+
+# Utilities
+anyhow = "1.0"
+thiserror = "1.0"
+once_cell = "1.19"
+parking_lot = "0.12"
+rayon = "1.8"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0

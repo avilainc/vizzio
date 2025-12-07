@@ -1,0 +1,346 @@
+//! Core browser functionality
+
+use crate::layers::LayerStack;
+use crate::privacy::{CookieJar, CookiePolicy, FingerprintProtection, FingerprintLevel};
+use std::collections::BTreeMap;
+use std::time::{SystemTime, UNIX_EPOCH};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum BrowserError {
+    #[error("Network error: {0}")]
+    NetworkError(String),
+    #[error("Invalid URL: {0}")]
+    InvalidUrl(String),
+    #[error("Request timeout")]
+    Timeout,
+    #[error("Too many redirects")]
+    TooManyRedirects,
+    #[error("Layer error: {0}")]
+    LayerError(String),
+    #[error("Other error: {0}")]
+    Other(String),
+}
+
+/// Browser runtime instance with stateful session management
+#[derive(Debug)]
+pub struct Browser {
+    pub config: BrowserConfig,
+    pub layer_stack: LayerStack,
+    pub cache: BTreeMap<String, CachedResponse>,
+    pub cookie_jar: CookieJar,
+    pub history: Vec<HistoryEntry>,
+    pub fingerprint_protection: FingerprintProtection,
+}
+
+impl Browser {
+    /// Create new browser instance with configuration
+    pub fn new(config: BrowserConfig) -> Result<Self, BrowserError> {
+        let cookie_policy = if config.enable_cookies {
+            CookiePolicy::AcceptFirstParty
+        } else {
+            CookiePolicy::BlockAll
+        };
+
+        Ok(Self {
+            layer_stack: LayerStack::new(config.num_layers),
+            cookie_jar: CookieJar::new(cookie_policy),
+            fingerprint_protection: FingerprintProtection::new(FingerprintLevel::Strict),
+            cache: BTreeMap::new(),
+            history: Vec::new(),
+            config,
+        })
+    }
+
+    /// Navigate to a URL
+    pub async fn navigate(&mut self, url: &str) -> Result<Response, BrowserError> {
+        // Add to history
+        self.history.push(HistoryEntry {
+            url: url.to_string(),
+            timestamp: current_timestamp(),
+            title: None,
+        });
+
+        // Create request
+        let request = Request {
+            url: url.to_string(),
+            method: "GET".to_string(),
+            headers: BTreeMap::new(),
+            body: None,
+        };
+
+        // Process through layer stack
+        self.layer_stack.process_request(&request).await
+    }
+
+    /// Enable a security layer
+    pub async fn enable_layer(&mut self, layer_name: &str) -> Result<(), BrowserError> {
+        self.layer_stack
+            .enable_layer(layer_name)
+            .map_err(|e| BrowserError::LayerError(e.to_string()))
+    }
+
+    /// Disable a security layer
+    pub async fn disable_layer(&mut self, layer_name: &str) -> Result<(), BrowserError> {
+        self.layer_stack
+            .disable_layer(layer_name)
+            .map_err(|e| BrowserError::LayerError(e.to_string()))
+    }
+
+    /// Take a screenshot (placeholder)
+    pub async fn screenshot(&self, path: &str) -> Result<(), BrowserError> {
+        // TODO: Implement screenshot functionality
+        Ok(())
+    }
+
+    /// Clear browsing data
+    pub fn clear_data(&mut self) {
+        self.cache.clear();
+        self.cookie_jar.clear();
+        self.history.clear();
+    }
+}
+
+/// Browser configuration parameters and security policy enforcement
+#[derive(Debug, Clone)]
+pub struct BrowserConfig {
+    pub user_agent: String,
+    pub enable_javascript: bool,
+    pub enable_cookies: bool,
+    pub enable_cache: bool,
+    pub max_redirects: usize,
+    pub timeout_ms: u64,
+
+    // Cryptographic security enforcement
+    pub strict_ssl: bool,
+    pub block_trackers: bool,
+    pub block_advertisements: bool,
+    pub ephemeral_session_mode: bool,
+
+    // Anonymity layer configuration
+    pub num_layers: usize,          // 7 layers by default
+    pub tor_enabled: bool,
+    pub vpn_enabled: bool,
+    pub i2p_enabled: bool,
+    pub obfuscation_enabled: bool,
+}
+
+impl Default for BrowserConfig {
+    fn default() -> Self {
+        Self {
+            user_agent: "Avila Browser/1.0".to_string(),
+            enable_javascript: false,      // Disabled for attack surface reduction
+            enable_cookies: false,
+            enable_cache: true,
+            max_redirects: 5,
+            timeout_ms: 30_000,
+
+            strict_ssl: true,
+            block_trackers: true,
+            block_advertisements: true,
+            ephemeral_session_mode: true,
+
+            num_layers: 7,
+            tor_enabled: true,
+            vpn_enabled: true,
+            i2p_enabled: true,
+            obfuscation_enabled: true,
+        }
+    }
+}
+
+impl Browser {
+    /// Instantiate new browser runtime with specified configuration
+    pub fn new(config: BrowserConfig) -> Self {
+        let layer_stack = LayerStack::new(config.num_layers);
+
+        Self {
+            config,
+            layer_stack,
+            cache: BTreeMap::new(),
+            cookies: BTreeMap::new(),
+            history: Vec::new(),
+        }
+    }
+
+    /// Execute HTTP navigation to specified URL with layer stack protection
+    pub fn navigate(&mut self, url: &str) -> Result<Response, BrowserError> {
+        // 1. URL parsing and validation
+        let request = Request::parse(url)?;
+
+        // 2. Cache lookup with TTL validation
+        if self.config.enable_cache {
+            if let Some(cached) = self.cache.get(url) {
+                if !cached.is_expired() {
+                    return Ok(cached.response.clone());
+                }
+            }
+        }
+
+        // 3. Layer stack traversal with onion encryption
+        let response = self.layer_stack.send_request(&request)?;
+
+        // 4. Cache insertion with timestamp
+        if self.config.enable_cache {
+            self.cache.insert(url.to_string(), CachedResponse {
+                response: response.clone(),
+                timestamp: current_timestamp(),
+                ttl: 3600, // 1 hour
+            });
+        }
+
+        // 5. Session history maintenance
+        self.history.push(HistoryEntry {
+            url: url.to_string(),
+            title: response.title.clone(),
+            timestamp: current_timestamp(),
+        });
+
+        Ok(response)
+    }
+
+    /// Purge all cached data and session state
+    pub fn clear_data(&mut self) {
+        self.cache.clear();
+        self.cookies.clear();
+        self.history.clear();
+    }
+
+    /// Retrieve current security and anonymity metrics
+    pub fn security_metrics(&self) -> SecurityMetrics {
+        SecurityMetrics {
+            layers_active: self.layer_stack.active_layers(),
+            anonymity_level: self.layer_stack.anonymity_level(),
+            latency_overhead_ms: self.layer_stack.total_latency(),
+            bandwidth_overhead: self.layer_stack.bandwidth_overhead(),
+        }
+    }
+}
+
+/// HTTP Request
+#[derive(Debug, Clone)]
+pub struct Request {
+    pub method: HttpMethod,
+    pub url: String,
+    pub headers: BTreeMap<String, String>,
+    pub body: Vec<u8>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum HttpMethod {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    HEAD,
+}
+
+impl Request {
+    pub fn parse(url: &str) -> Result<Self, BrowserError> {
+        if url.is_empty() {
+            return Err(BrowserError::InvalidUrl);
+        }
+
+        Ok(Self {
+            method: HttpMethod::GET,
+            url: url.to_string(),
+            headers: BTreeMap::new(),
+            body: Vec::new(),
+        })
+    }
+
+    pub fn add_header(&mut self, key: String, value: String) {
+        self.headers.insert(key, value);
+    }
+}
+
+/// HTTP Response
+#[derive(Debug, Clone)]
+pub struct Response {
+    pub status_code: u16,
+    pub headers: BTreeMap<String, String>,
+    pub body: Vec<u8>,
+    pub title: Option<String>,
+}
+
+impl Response {
+    pub fn ok(body: Vec<u8>) -> Self {
+        Self {
+            status_code: 200,
+            headers: BTreeMap::new(),
+            body,
+            title: None,
+        }
+    }
+
+    pub fn body_as_string(&self) -> String {
+        String::from_utf8_lossy(&self.body).to_string()
+    }
+}
+
+/// Cached response
+#[derive(Debug, Clone)]
+pub struct CachedResponse {
+    pub response: Response,
+    pub timestamp: u64,
+    pub ttl: u64,
+}
+
+impl CachedResponse {
+    pub fn is_expired(&self) -> bool {
+        current_timestamp() - self.timestamp > self.ttl
+    }
+}
+
+/// History entry
+#[derive(Debug, Clone)]
+pub struct HistoryEntry {
+    pub url: String,
+    pub title: Option<String>,
+    pub timestamp: u64,
+}
+
+/// Security metrics
+#[derive(Debug, Clone)]
+pub struct SecurityMetrics {
+    pub layers_active: usize,
+    pub anonymity_level: f64,        // 0.0 - 1.0
+    pub latency_overhead_ms: u64,
+    pub bandwidth_overhead: f64,     // Multiplier (e.g., 2.5x)
+}
+
+#[derive(Debug)]
+pub enum BrowserError {
+    InvalidUrl,
+    NetworkError,
+    TimeoutError,
+    SslError,
+    LayerError(String),
+}
+
+fn current_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_browser_creation() {
+        let config = BrowserConfig::default();
+        let browser = Browser::new(config);
+
+        assert_eq!(browser.layer_stack.layers.len(), 7);
+    }
+
+    #[test]
+    fn test_request_parsing() {
+        let request = Request::parse("https://example.com").unwrap();
+        assert_eq!(request.method, HttpMethod::GET);
+        assert_eq!(request.url, "https://example.com");
+    }
+}

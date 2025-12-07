@@ -1,0 +1,422 @@
+[workspace]
+resolver = "2"
+
+# Todos os 107 crates do ecossistema Avila
+members = [
+    "avila-dataframe",
+    "aviladb",
+    "avila-db",
+    "aviladb-core",
+    "avila-distributed-system",
+    "avila-dns",
+    "avila-election",
+    "avila-error",
+    "avila-errors-derive",
+    "avila-fft",
+    "avila-finite-fields",
+    "avila-framework",
+    "avila-frontend",
+    "avila-future",
+    "avila-geo",
+    "avila-geo-workspace",
+    "avila-gis-desktop",
+    "avila-gltf",
+    "avila-gossip",
+    "avila-grpc",
+    "avila-hash",
+    "avila-http",
+    "avila-id",
+    "avila-ifc",
+    "avila-image",
+    "avila-jwt",
+    "avila-kdf",
+    "avila-lease",
+    "avila-linalg",
+    "avila-loadbalancer",
+    "avila-location",
+    "avila-lock",
+    "avila-log",
+    "avila-logger",
+    "avila-mac",
+    "avila-math",
+    "avila-mesh",
+    "avila-meta",
+    "avila-metadata-extractor",
+    "avila-metrics",
+    "avila-ml",
+    "avila-modular",
+    "avila-molecule",
+    "avila-monitor",
+    "avila-mpc",
+    "avila-ndarray",
+    "avila-nucleus",
+    "avila-numeric",
+    "avila-oauth",
+    "avila-onion-routing",
+    "avila-optimizer",
+    "avila-orchestrator",
+    "avila-organ",
+    "avila-organism",
+    "avila-parallel",
+    "avila-partition",
+    "avila-pki",
+    "avila-pool",
+    "avila-post-quantum",
+    "avila-prime",
+    "avila-primitives",
+    "avila-proxy",
+    "avila-quantum",
+    "avila-quic",
+    "avila-quinn",
+    "avila-raft",
+    "avila-rand",
+    "avila-random",
+    "avila-rand-simple",
+    "avila-rayon-simple",
+    "avila-reduction",
+    "avila-regex",
+    "avila-replication",
+    "avila-serde",
+    "avila-serialize",
+    "avila-serialize-derive",
+    "avila-service-mesh",
+    "avila-shard",
+    "avila-signature",
+    "avila-stealth",
+    "avila-sync",
+    "avila-tcp",
+    "avila-telemetry",
+    "avila-term",
+    "avila-terminal",
+    "avila-tesselation",
+    "avila-threshold",
+    "avila-time",
+    "avila-tissue",
+    "avila-tls",
+    "avila-tokenizer",
+    "avila-tracing",
+    "avila-udp",
+    "avila-validate",
+    "avila-vec3d",
+    "avila-vizzio",
+    "avila-web",
+    "avila-webframework",
+    "avila-websocket",
+    "avila-workflow",
+    "avila-zkp",
+]
+
+# Crates deprecated - manter para compatibilidade mas não desenvolver
+exclude = [
+    "avila-error-old",
+    "avila-serde-old",
+]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Vizzio Team <team@vizzio.com>"]
+repository = "https://github.com/vizzio/avila"
+homepage = "https://avila.dev"
+documentation = "https://docs.avila.dev"
+keywords = ["database", "dataframe", "distributed", "crypto", "scientific"]
+categories = ["database", "science", "cryptography", "network-programming"]
+rust-version = "1.75"
+
+[workspace.dependencies]
+# Versões centralizadas de dependências comuns
+
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1.75"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging & tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+log = "0.4"
+
+# Crypto (manter minimal - preferir implementações próprias)
+# Apenas para fallback/comparação
+ring = { version = "0.17", optional = true }
+
+# Networking
+quinn = { version = "0.10", optional = true }
+rustls = { version = "0.21", optional = true }
+
+# Math & Science
+num-traits = "0.2"
+num-complex = "0.4"
+
+# Testing
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.4"
+quickcheck = "1.0"
+
+# Benchmarking
+divan = "0.1"
+
+# Utilities
+once_cell = "1.19"
+parking_lot = "0.12"
+crossbeam = "0.8"
+rayon = "1.8"
+
+# CLI (para ferramentas)
+clap = { version = "4.4", features = ["derive"] }
+
+# Dependências internas (path dependencies)
+avila-error = { path = "avila-error" }
+avila-types = { path = "avila-types", optional = true }
+avila-crypto = { path = "avila-hash", optional = true }
+avila-network = { path = "avila-quic", optional = true }
+
+[profile.dev]
+opt-level = 0
+debug = true
+split-debuginfo = "unpacked"
+incremental = true
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+debug = false
+strip = "symbols"
+panic = "abort"
+
+# Performance-focused release para benchmarks
+[profile.bench]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+
+# Para CI - builds rápidos
+[profile.ci]
+inherits = "dev"
+opt-level = 1
+debug = false
+
+# Para fuzzing
+[profile.fuzz]
+inherits = "dev"
+opt-level = 3
+lto = false
+debug-assertions = true
+overflow-checks = true
+
+[workspace.metadata]
+# Metadados customizados
+
+# Documentação
+docs-rs = { all-features = true, rustdoc-args = ["--cfg", "docsrs"] }
+
+# CI/CD
+ci = { platforms = ["linux", "windows", "macos"] }
+
+# Categorização de crates por domínio
+[workspace.metadata.categories]
+core = [
+    "avila-error",
+    "avila-types",
+    "avila-serde",
+    "avila-serialize",
+]
+database = [
+    "avila-db",
+    "aviladb",
+    "aviladb-core",
+    "avila-storage",
+    "avila-query",
+    "avila-transaction",
+]
+dataframe = [
+    "avila-dataframe",
+    "avila-ndarray",
+    "avila-linalg",
+]
+networking = [
+    "avila-quic",
+    "avila-quinn",
+    "avila-tcp",
+    "avila-udp",
+    "avila-http",
+    "avila-grpc",
+    "avila-websocket",
+    "avila-tls",
+]
+distributed = [
+    "avila-distributed-system",
+    "avila-raft",
+    "avila-gossip",
+    "avila-election",
+    "avila-replication",
+    "avila-partition",
+    "avila-shard",
+]
+crypto = [
+    "avila-hash",
+    "avila-signature",
+    "avila-mac",
+    "avila-kdf",
+    "avila-jwt",
+    "avila-pki",
+    "avila-post-quantum",
+    "avila-zkp",
+]
+scientific = [
+    "avila-math",
+    "avila-fft",
+    "avila-linalg",
+    "avila-numeric",
+    "avila-ml",
+    "avila-quantum",
+    "avila-finite-fields",
+]
+geo = [
+    "avila-geo",
+    "avila-geo-workspace",
+    "avila-gis-desktop",
+    "avila-location",
+]
+observability = [
+    "avila-log",
+    "avila-logger",
+    "avila-tracing",
+    "avila-metrics",
+    "avila-monitor",
+    "avila-telemetry",
+]
+infrastructure = [
+    "avila-orchestrator",
+    "avila-loadbalancer",
+    "avila-proxy",
+    "avila-service-mesh",
+    "avila-dns",
+]
+utilities = [
+    "avila-time",
+    "avila-id",
+    "avila-rand",
+    "avila-validate",
+    "avila-regex",
+    "avila-tokenizer",
+]
+
+# Configuração de features globais
+[workspace.metadata.features]
+# Feature flags comuns
+default = ["std"]
+std = []
+no_std = []
+alloc = []
+
+# Performance
+simd = []
+parallel = []
+optimized = ["simd", "parallel"]
+
+# Crypto features
+crypto-full = ["secp256k1", "ed25519", "bls12-381"]
+secp256k1 = []
+ed25519 = []
+bls12-381 = []
+
+# Network features
+quic = ["quinn", "rustls"]
+tls = ["rustls"]
+
+# Database features
+db-full = ["transactions", "replication", "backup"]
+transactions = []
+replication = []
+backup = []
+
+# Scientific computing
+science-full = ["fft", "ml", "quantum"]
+fft = []
+ml = []
+quantum = []
+
+# Development features
+dev = ["testing", "benchmarking", "profiling"]
+testing = ["proptest", "quickcheck"]
+benchmarking = ["criterion", "divan"]
+profiling = []
+
+# Enterprise features (licença comercial)
+enterprise = ["multi-tenancy", "advanced-security", "ha"]
+multi-tenancy = []
+advanced-security = []
+ha = [] # High availability
+
+# Experimental features
+experimental = ["quantum-computing", "neuromorphic"]
+quantum-computing = []
+neuromorphic = []
+
+[workspace.lints.rust]
+# Lints estritos para qualidade de código
+unsafe_code = "warn"
+missing_docs = "warn"
+unreachable_pub = "warn"
+unused_crate_dependencies = "warn"
+
+[workspace.lints.clippy]
+# Clippy lints customizados
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+cargo = "warn"
+
+# Allows específicos (quando necessário)
+# must_use_candidate = "allow"
+# missing_errors_doc = "allow"
+
+# ============================================================================
+# INSTRUÇÕES DE USO
+# ============================================================================
+#
+# 1. Copie este arquivo para a raiz: d:\Vizzio\packages\avila\Cargo.toml
+#
+# 2. Valide a estrutura:
+#    cargo check --workspace
+#
+# 3. Rode testes:
+#    cargo test --workspace
+#
+# 4. Build release:
+#    cargo build --workspace --release
+#
+# 5. Documentação:
+#    cargo doc --workspace --no-deps --open
+#
+# 6. Benchmarks:
+#    cargo bench --workspace
+#
+# 7. Lint:
+#    cargo clippy --workspace --all-features -- -D warnings
+#
+# 8. Format:
+#    cargo fmt --all
+#
+# ============================================================================
+# PRÓXIMOS PASSOS
+# ============================================================================
+#
+# - Ajustar paths se algum crate estiver em subdiretório diferente
+# - Adicionar dependências específicas de cada crate
+# - Configurar features específicas por crate
+# - Testar build em diferentes plataformas (Linux, Windows, macOS)
+# - Configurar CI/CD (GitHub Actions)
+#
+# ============================================================================

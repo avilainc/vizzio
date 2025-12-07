@@ -1,0 +1,36 @@
+[package]
+name = "avila-coordinator"
+version = "0.3.0"
+edition = "2021"
+authors = ["Nícolas Ávila", "Avila Team"]
+description = "Advanced task coordination library with scheduling, dependencies, and metrics - Pure Rust implementation"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/avila/avila-coordinator"
+keywords = ["coordinator", "task", "scheduling", "workflow", "distributed"]
+categories = ["development-tools", "concurrency", "data-structures"]
+
+[dependencies]
+# No external dependencies - Pure Rust implementation
+
+[dev-dependencies]
+# No external dependencies for testing
+
+[features]
+default = []
+# Use internal avila serialization instead of serde
+avila-serde = []
+# Enable concurrent features using avila's concurrency primitives
+avila-concurrent = []
+# Enable metrics collection using avila's metrics
+avila-metrics = []
+# Enable tracing support using avila's logging
+avila-tracing = []
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.bench]
+inherits = "release"
+debug = true

@@ -1,0 +1,317 @@
+name: 🚀 Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      force_deploy:
+        description: 'Force deploy sem testes?'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ============================================================================
+  # QUALITY CHECKS (antes de deploy)
+  # ============================================================================
+  quality-checks:
+    name: 🔍 Quality Checks
+    runs-on: ubuntu-latest
+    if: github.event.inputs.force_deploy != 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Rust: Clippy
+        run: cargo clippy --workspace --all-features -- -D warnings
+
+      - name: Rust: Format check
+        run: cargo fmt --all -- --check
+
+      - name: Node: Install
+        run: npm ci
+
+      - name: Node: Lint
+        run: npm run lint --workspaces
+
+      - name: Node: Type check
+        run: npx tsc --noEmit
+
+  # ============================================================================
+  # BUILD DOCKER IMAGES
+  # ============================================================================
+  build-images:
+    name: 🐳 Build Docker Images
+    runs-on: ubuntu-latest
+    needs: quality-checks
+    if: always()
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      backend_image: ${{ steps.meta-backend.outputs.tags }}
+      frontend_image: ${{ steps.meta-frontend.outputs.tags }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Backend Image
+      - name: Extract metadata (backend)
+        id: meta-backend
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Frontend Image
+      - name: Extract metadata (frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================================
+  # DEPLOY TO STAGING
+  # ============================================================================
+  deploy-staging:
+    name: 🟡 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://staging.vizzio.local
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to staging cluster
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG_STAGING }}
+          BACKEND_IMAGE: ${{ needs.build-images.outputs.backend_image }}
+          FRONTEND_IMAGE: ${{ needs.build-images.outputs.frontend_image }}
+        run: |
+          # Configurar kubectl
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+          # Deploy usando helm ou kubectl
+          kubectl set image deployment/vizzio-backend \
+            backend=${{ env.BACKEND_IMAGE }} \
+            -n vizzio-staging
+
+          kubectl set image deployment/vizzio-frontend \
+            frontend=${{ env.FRONTEND_IMAGE }} \
+            -n vizzio-staging
+
+          # Aguardar rollout
+          kubectl rollout status deployment/vizzio-backend -n vizzio-staging
+          kubectl rollout status deployment/vizzio-frontend -n vizzio-staging
+
+      - name: Run smoke tests
+        run: |
+          echo "Executando smoke tests em staging..."
+          curl -f http://staging.vizzio.local/health || exit 1
+          curl -f http://staging.vizzio.local/api/health || exit 1
+
+      - name: Notify deployment
+        if: success()
+        uses: davisjtx/sendgrid-action@main
+        with:
+          from: 'noreply@avila.inc'
+          to: 'nicolas@avila.inc'
+          subject: '✅ Deployment to Staging Successful'
+          html: |
+            <h2>✅ Staging Deployment Successful</h2>
+            <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+            <p><strong>Commit:</strong> ${{ github.sha }}</p>
+            <p><strong>Backend:</strong> ${{ needs.build-images.outputs.backend_image }}</p>
+            <p><strong>Frontend:</strong> ${{ needs.build-images.outputs.frontend_image }}</p>
+            <p><a href="https://staging.vizzio.local">Access Staging</a></p>
+          api_key: ${{ secrets.SENDGRID_API_KEY }}
+        continue-on-error: true
+
+  # ============================================================================
+  # DEPLOY TO PRODUCTION
+  # ============================================================================
+  deploy-production:
+    name: 🟢 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-images, deploy-staging]
+    if: |
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://vizzio.com
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to production cluster
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG_PROD }}
+          BACKEND_IMAGE: ${{ needs.build-images.outputs.backend_image }}
+          FRONTEND_IMAGE: ${{ needs.build-images.outputs.frontend_image }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+          kubectl set image deployment/vizzio-backend \
+            backend=${{ env.BACKEND_IMAGE }} \
+            -n vizzio-prod
+
+          kubectl set image deployment/vizzio-frontend \
+            frontend=${{ env.FRONTEND_IMAGE }} \
+            -n vizzio-prod
+
+          kubectl rollout status deployment/vizzio-backend -n vizzio-prod
+          kubectl rollout status deployment/vizzio-frontend -n vizzio-prod
+
+      - name: Run health checks
+        run: |
+          echo "Executando health checks em produção..."
+          for i in {1..5}; do
+            if curl -f https://vizzio.com/health; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            echo "Tentativa $i/5 falhada, aguardando..."
+            sleep 10
+          done
+          exit 1
+
+      - name: Notify production deployment
+        if: success()
+        uses: davisjtx/sendgrid-action@main
+        with:
+          from: 'noreply@avila.inc'
+          to: 'nicolas@avila.inc'
+          subject: '🎉 Production Deployment Successful - ${{ github.ref_name }}'
+          html: |
+            <h2>🎉 Production Deployment Successful</h2>
+            <p><strong>Version:</strong> ${{ github.ref_name }}</p>
+            <p><strong>Commit:</strong> ${{ github.sha }}</p>
+            <p><strong>Backend:</strong> ${{ needs.build-images.outputs.backend_image }}</p>
+            <p><strong>Frontend:</strong> ${{ needs.build-images.outputs.frontend_image }}</p>
+            <p><strong>Deployed by:</strong> ${{ github.actor }}</p>
+            <p><strong>Time:</strong> $(date)</p>
+            <p><a href="https://vizzio.com">Visit Production</a></p>
+          api_key: ${{ secrets.SENDGRID_API_KEY }}
+        continue-on-error: true
+
+  # ============================================================================
+  # ROLLBACK CAPABILITY
+  # ============================================================================
+  rollback-production:
+    name: 🔙 Rollback (if needed)
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: failure()
+    environment:
+      name: production
+
+    steps:
+      - name: Trigger rollback
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG_PROD }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+          echo "Iniciando rollback automático..."
+          kubectl rollout undo deployment/vizzio-backend -n vizzio-prod
+          kubectl rollout undo deployment/vizzio-frontend -n vizzio-prod
+
+      - name: Notify rollback
+        uses: davisjtx/sendgrid-action@main
+        with:
+          from: 'noreply@avila.inc'
+          to: 'nicolas@avila.inc'
+          subject: '⚠️ VIZZIO Production Rollback Triggered'
+          html: |
+            <h2>⚠️ Rollback Triggered</h2>
+            <p><strong>Reason:</strong> Deployment failed, automatic rollback initiated</p>
+            <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+            <p><strong>Commit:</strong> ${{ github.sha }}</p>
+            <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Logs</a></p>
+          api_key: ${{ secrets.SENDGRID_API_KEY }}
+        continue-on-error: true

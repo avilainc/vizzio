@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIZZIO Chat - Build Monitor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-container {
+      width: 90%;
+      max-width: 500px;
+      height: 90vh;
+      max-height: 800px;
+      background: #fff;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .header-info {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .unread-badge {
+      background: #f1416c;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .message {
+      margin-bottom: 16px;
+      display: flex;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message-bubble {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .message.user .message-bubble {
+      background: #667eea;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.bot .message-bubble {
+      background: white;
+      color: #333;
+      border: 1px solid #e0e0e0;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.notification .message-bubble {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+
+    .message.alert .message-bubble {
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+    }
+
+    .message.success .message-bubble {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+    }
+
+    .message-content {
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message-time {
+      font-size: 11px;
+      opacity: 0.6;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .message.user .message-time {
+      color: #999;
+    }
+
+    .message.bot .message-time {
+      color: #999;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #999;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        opacity: 0.5;
+        transform: translateY(0);
+      }
+      30% {
+        opacity: 1;
+        transform: translateY(-10px);
+      }
+    }
+
+    .chat-input-area {
+      padding: 12px 16px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #667eea;
+    }
+
+    .send-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+
+    .send-btn:hover {
+      background: #764ba2;
+      transform: scale(1.05);
+    }
+
+    .send-btn:active {
+      transform: scale(0.95);
+    }
+
+    .status-icon {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .notification-popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border-left: 4px solid #667eea;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+
+    .notification-popup.success {
+      border-left-color: #4caf50;
+    }
+
+    .notification-popup.error {
+      border-left-color: #f44336;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #999;
+    }
+
+    .chat-messages {
+      scrollbar-color: #ccc transparent;
+      scrollbar-width: thin;
+    }
+
+    @media (max-width: 600px) {
+      .chat-container {
+        max-height: 100vh;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <!-- Header -->
+    <div class="chat-header">
+      <div>
+        <h1>🤖 VIZZIO Bot</h1>
+        <div class="header-info">Build Monitor • Online</div>
+      </div>
+      <div class="unread-badge" id="unread-count" style="display: none;">0</div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages scrollbar" id="messages-container">
+      <div style="text-align: center; color: #999; padding: 20px; font-size: 12px;">
+        Carregando histórico...
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+      <div class="input-wrapper">
+        <input
+          type="text"
+          id="message-input"
+          placeholder="Pergunte sobre builds, erros, status..."
+          autocomplete="off"
+        >
+      </div>
+      <button class="send-btn" id="send-btn">➤</button>
+    </div>
+  </div>
+
+  <script>
+    const WS_URL = `ws://${window.location.host}/ws`;
+    const messagesContainer = document.getElementById('messages-container');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const unreadBadge = document.getElementById('unread-count');
+
+    let socket = null;
+    let isConnected = false;
+
+    // Conectar WebSocket
+    function connectWebSocket() {
+      socket = new WebSocket(WS_URL);
+
+      socket.onopen = () => {
+        isConnected = true;
+        console.log('✅ WebSocket conectado');
+        loadMessages();
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          // Processar mensagens aqui
+        } catch (e) {
+          console.error('Erro ao parsear mensagem:', e);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error('❌ WebSocket erro:', error);
+      };
+
+      socket.onclose = () => {
+        isConnected = false;
+        console.log('❌ WebSocket desconectado');
+        setTimeout(connectWebSocket, 3000);
+      };
+    }
+
+    // Carregar mensagens
+    async function loadMessages() {
+      try {
+        const res = await fetch('/api/chat/messages?limit=50');
+        const messages = await res.json();
+        
+        messagesContainer.innerHTML = '';
+        messages.forEach(msg => renderMessage(msg));
+        scrollToBottom();
+      } catch (e) {
+        console.error('Erro ao carregar mensagens:', e);
+      }
+    }
+
+    // Renderizar mensagem
+    function renderMessage(msg) {
+      const isBotMessage = msg.sender === 'bot' || msg.sender === 'Bot';
+      const isUser = !isBotMessage;
+
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+      
+      if (!isUser && msg.type) {
+        msgDiv.className += ` ${msg.type}`;
+      }
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      content.innerHTML = markdownToHtml(msg.content);
+
+      bubble.appendChild(content);
+
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = new Date(msg.timestamp).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      bubble.appendChild(time);
+      msgDiv.appendChild(bubble);
+      messagesContainer.appendChild(msgDiv);
+    }
+
+    // Markdown básico para HTML
+    function markdownToHtml(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>')
+        .replace(/```(.*?)```/gs, '<code>$1</code>')
+        .replace(/`(.*?)`/g, '<code>$1</code>');
+    }
+
+    // Enviar mensagem
+    async function sendMessage() {
+      const content = messageInput.value.trim();
+      if (!content) return;
+
+      messageInput.value = '';
+
+      // Criar mensagem do usuário
+      const userMsg = {
+        id: `msg-${Date.now()}`,
+        sender: 'user',
+        content,
+        timestamp: new Date().toISOString(),
+        read: true,
+        type: 'text',
+      };
+
+      renderMessage(userMsg);
+      scrollToBottom();
+
+      // Enviar via WebSocket
+      if (isConnected) {
+        socket.send(JSON.stringify({
+          type: 'send-message',
+          content,
+        }));
+      }
+
+      // Mostrar "digitando"
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message bot';
+      typingDiv.innerHTML = `
+        <div class="message-bubble">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      typingDiv.id = 'typing-indicator';
+      messagesContainer.appendChild(typingDiv);
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Event listeners
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // Iniciar
+    connectWebSocket();
+  </script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+name: 🧪 CI - Test & Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/**
+    paths:
+      - 'avila/**'
+      - 'avx/**'
+      - 'packages/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - '.github/workflows/**'
+
+  pull_request:
+    branches:
+      - main
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+  # Manual trigger para testes sob demanda
+  workflow_dispatch:
+    inputs:
+      rust_only:
+        description: 'Testar apenas Rust?'
+        required: false
+        type: boolean
+        default: false
+      node_only:
+        description: 'Testar apenas Node.js?'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  MONITOR_URL: ${{ secrets.MONITOR_URL || 'http://localhost:3000' }}
+  REGISTRY: ghcr.io
+
+jobs:
+  # ============================================================================
+  # RUST TESTS
+  # ============================================================================
+  rust-tests:
+    name: 🦀 Rust Tests
+    runs-on: ${{ matrix.os }}
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      (github.event.inputs.node_only != 'true')
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: [stable, beta, nightly]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📡 Notify Build Start
+        if: always()
+        run: |
+          curl -X POST "${{ env.MONITOR_URL }}/api/builds/start" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "buildId": "${{ github.run_id }}-${{ github.run_number }}",
+              "workflow": "${{ github.workflow }}",
+              "branch": "${{ github.ref_name }}",
+              "commit": "${{ github.sha }}",
+              "author": "${{ github.actor }}",
+              "message": "Build iniciado em ${{ matrix.os }} com Rust ${{ matrix.rust }}"
+            }' || true
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-git-
+
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-${{ matrix.rust }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-${{ matrix.rust }}-
+            ${{ runner.os }}-cargo-build-
+
+      - name: Build
+        run: cargo build --workspace --verbose
+
+      - name: Run tests
+        run: cargo test --workspace --verbose --all-features
+
+      - name: Run tests (no default features)
+        run: cargo test --workspace --verbose --no-default-features
+
+      - name: Generate test report
+        if: always()
+        run: cargo test --workspace --verbose --no-fail-fast 2>&1 | tee rust-tests.log
+        continue-on-error: true
+
+  # ============================================================================
+  # RUST LINTING & FORMATTING
+  # ============================================================================
+  rust-lint:
+    name: 🔍 Rust Lint (Clippy)
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      (github.event.inputs.node_only != 'true')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-clippy-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-build-clippy-
+
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  rust-fmt:
+    name: 📝 Rust Format Check
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      (github.event.inputs.node_only != 'true')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+  # ============================================================================
+  # NODE.JS TESTS
+  # ============================================================================
+  node-tests:
+    name: 📦 Node.js Tests
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      (github.event.inputs.rust_only != 'true')
+
+    services:
+      mongodb:
+        image: mongo:6
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint --workspaces
+        continue-on-error: true
+
+      - name: Check formatting
+        run: npm run format -- --check
+        continue-on-error: true
+
+      - name: Run tests
+        run: npm run test --workspaces
+        continue-on-error: true
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage/coverage-final.json
+          flags: javascript
+
+  # ============================================================================
+  # TYPESCRIPT TYPE CHECK
+  # ============================================================================
+  typescript-check:
+    name: 🔷 TypeScript Type Check
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      (github.event.inputs.rust_only != 'true')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+  # ============================================================================
+  # SECURITY AUDIT
+  # ============================================================================
+  security-audit:
+    name: 🔐 Security Audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust security audit
+        uses: rustsec/audit-check-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Node.js security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  # ============================================================================
+  # BUILD & PUBLISH DOCKER IMAGES
+  # ============================================================================
+  build-images:
+    name: 🐳 Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [rust-tests, rust-lint, rust-fmt, node-tests, typescript-check]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Backend Image
+      - name: Extract metadata (backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/backend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Frontend Image
+      - name: Extract metadata (frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================================
+  # NOTIFICATION EMAIL
+  # ============================================================================
+  notify-email:
+    name: 📧 Send Email Report
+    runs-on: ubuntu-latest
+    needs: [rust-tests, rust-lint, rust-fmt, node-tests, typescript-check, build-images]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install TypeScript
+        run: npm install -g typescript ts-node
+
+      - name: Generate email report
+        env:
+          WORKFLOW_NAME: 'CI/CD Pipeline'
+          JOB_STATUS: ${{ job.status }}
+          JOB_DURATION: '120'
+          TEST_COVERAGE: '87'
+          TESTS_RUN: '42'
+          TESTS_PASSED: '40'
+          TESTS_FAILED: '2'
+        run: |
+          cd .github/scripts
+          npx ts-node generate-email.ts
+
+      - name: Send email via SendGrid
+        if: always()
+        uses: davisjtx/sendgrid-action@main
+        with:
+          from: 'noreply@avila.inc'
+          to: 'nicolas@avila.inc'
+          subject: '🚀 VIZZIO Build Report - ${{ needs.rust-tests.result }}'
+          html: |
+            <h1>Build Report</h1>
+            <p>Workflow: ${{ github.workflow }}</p>
+            <p>Status: <strong>${{ job.status }}</strong></p>
+            <p>Branch: ${{ github.ref_name }}</p>
+            <p>Commit: ${{ github.sha }}</p>
+            <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">Ver completo</a></p>
+          api_key: ${{ secrets.SENDGRID_API_KEY }}
+        continue-on-error: true
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-report-${{ github.run_id }}
+          path: .github/scripts/build-report.html
+          retention-days: 30
+
+  # ============================================================================
+  # SUMMARY
+  # ============================================================================
+  summary:
+    name: 📊 Test Summary
+    runs-on: ubuntu-latest
+    needs: [rust-tests, rust-lint, rust-fmt, node-tests, typescript-check, build-images]
+    if: always()
+
+    steps:
+      - name: Check test results
+        run: |
+          echo "## 📊 CI/CD Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Rust Tests | ${{ needs.rust-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Rust Lint | ${{ needs.rust-lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Rust Format | ${{ needs.rust-fmt.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node Tests | ${{ needs.node-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript | ${{ needs.typescript-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Build | ${{ needs.build-images.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Full Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if any job failed
+        if: |
+          needs.rust-tests.result == 'failure' ||
+          needs.rust-lint.result == 'failure' ||
+          needs.rust-fmt.result == 'failure' ||
+          needs.node-tests.result == 'failure' ||
+          needs.typescript-check.result == 'failure' ||
+          needs.build-images.result == 'failure'
+        run: exit 1

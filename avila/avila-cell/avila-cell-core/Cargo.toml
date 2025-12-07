@@ -1,0 +1,15 @@
+[package]
+name = "avila-cell-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Avila Team"]
+description = "Core cell abstraction for Avila framework"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+thiserror = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
+
+[features]
+default = ["std"]
+std = []

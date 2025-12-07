@@ -1,0 +1,84 @@
+[package]
+name = "avila-analises"
+version = "0.1.0"
+edition = "2021"
+authors = ["Avila Team"]
+description = "High-performance analytics engine for behavioral analysis and Industry 4.0"
+license = "MIT"
+repository = "https://github.com/avila/avila-analises"
+keywords = ["analytics", "behavior", "industry40", "machine-learning", "rust"]
+categories = ["web-programming", "science", "data-structures"]
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Date/Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Concurrency
+dashmap = "5.5"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Web framework
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# WebSocket
+tokio-tungstenite = "0.21"
+
+# UUID
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Random
+rand = "0.8"
+
+# Validation
+validator = { version = "0.18", features = ["derive"] }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "behavior_analysis"
+harness = false
+
+[[bench]]
+name = "event_ingestion"
+harness = false
+
+[[bench]]
+name = "funnel_analysis"
+harness = false
+
+[[bench]]
+name = "ml_inference"
+harness = false
+
+[[bench]]
+name = "query_performance"
+harness = false
+
+[[bench]]
+name = "segmentation_benchmark"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.bench]
+inherits = "release"

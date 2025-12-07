@@ -1,0 +1,168 @@
+{
+    "name": "avila-copilot",
+    "displayName": "Avila Copilot",
+    "description": "AI-powered code completion with Ollama, DeepSeek, and OpenAI - No censorship, maximum performance",
+    "version": "1.0.0",
+    "publisher": "avila",
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Machine Learning",
+        "Snippets",
+        "Other"
+    ],
+    "keywords": [
+        "ai",
+        "copilot",
+        "code completion",
+        "ollama",
+        "deepseek",
+        "rust",
+        "machine learning",
+        "productivity"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "configuration": {
+            "title": "Avila Copilot",
+            "properties": {
+                "avilacopilot.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable Avila Copilot"
+                },
+                "avilacopilot.serverPath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Path to Avila Copilot LSP server binary or AI Proxy URL (http://localhost:8000)"
+                },
+                "avilacopilot.apiKey": {
+                    "type": "string",
+                    "default": "",
+                    "description": "API Key for Avila AI Proxy"
+                },
+                "avilacopilot.autoComplete": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable automatic code completion"
+                },
+                "avilacopilot.bugDetection": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable automatic bug detection"
+                },
+                "avilacopilot.maxLatencyMs": {
+                    "type": "number",
+                    "default": 50000,
+                    "description": "Maximum acceptable latency in milliseconds"
+                },
+                "avilacopilot.showInlineCompletions": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show inline completions as you type"
+                },
+                "avilacopilot.model": {
+                    "type": "string",
+                    "default": "dolphin-mistral",
+                    "enum": [
+                        "dolphin-mistral",
+                        "wizard-vicuna",
+                        "neural-chat",
+                        "gpt-oss:120b-cloud",
+                        "deepseek-coder",
+                        "deepseek-chat"
+                    ],
+                    "description": "AI model to use for completions"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "avilacopilot.toggle",
+                "title": "Toggle Avila Copilot",
+                "category": "Avila"
+            },
+            {
+                "command": "avilacopilot.complete",
+                "title": "Trigger Code Completion",
+                "category": "Avila"
+            },
+            {
+                "command": "avilacopilot.detectBugs",
+                "title": "Detect Bugs in Current File",
+                "category": "Avila"
+            },
+            {
+                "command": "avilacopilot.generateDocs",
+                "title": "Generate Documentation",
+                "category": "Avila"
+            },
+            {
+                "command": "avilacopilot.generateTests",
+                "title": "Generate Tests",
+                "category": "Avila"
+            },
+            {
+                "command": "avilacopilot.chat",
+                "title": "Open Avila Chat",
+                "category": "Avila"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "avilacopilot.complete",
+                "key": "ctrl+space",
+                "mac": "cmd+space",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "avilacopilot.chat",
+                "key": "ctrl+shift+a",
+                "mac": "cmd+shift+a"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js",
+        "package": "vsce package",
+        "publish": "vsce publish"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.85.0",
+        "@types/node": "20.x",
+        "@typescript-eslint/eslint-plugin": "^6.15.0",
+        "@typescript-eslint/parser": "^6.15.0",
+        "eslint": "^8.56.0",
+        "typescript": "^5.3.3",
+        "@vscode/test-electron": "^2.3.8",
+        "vsce": "^2.15.0"
+    },
+    "dependencies": {
+        "axios": "^1.6.2",
+        "ws": "^8.16.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/avilaops/vizzio"
+    },
+    "bugs": {
+        "url": "https://support.avila.inc"
+    },
+    "homepage": "https://avila.inc",
+    "license": "MIT",
+    "author": {
+        "name": "Avila Team",
+        "email": "nicolas@avila.inc",
+        "url": "https://avila.inc"
+    }
+}

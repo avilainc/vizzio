@@ -1,0 +1,95 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ESNext",
+        "lib": [
+            "ES2020"
+        ],
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": ".",
+        "paths": {
+            "@vizzio/core": [
+                "packages/core/src"
+            ],
+            "@vizzio/core/*": [
+                "packages/core/src/*"
+            ],
+            "@vizzio/workflows": [
+                "packages/workflows/src"
+            ],
+            "@vizzio/workflows/*": [
+                "packages/workflows/src/*"
+            ],
+            "@vizzio/email-service": [
+                "packages/email-service/src"
+            ],
+            "@vizzio/email-service/*": [
+                "packages/email-service/src/*"
+            ],
+            "@vizzio/finance-tools": [
+                "packages/finance-tools/src"
+            ],
+            "@vizzio/finance-tools/*": [
+                "packages/finance-tools/src/*"
+            ],
+            "@vizzio/marketing-automation": [
+                "packages/marketing-automation/src"
+            ],
+            "@vizzio/marketing-automation/*": [
+                "packages/marketing-automation/src/*"
+            ],
+            "@vizzio/sales-pipeline": [
+                "packages/sales-pipeline/src"
+            ],
+            "@vizzio/sales-pipeline/*": [
+                "packages/sales-pipeline/src/*"
+            ],
+            "@vizzio/shortcuts": [
+                "packages/shortcuts/src"
+            ],
+            "@vizzio/shortcuts/*": [
+                "packages/shortcuts/src/*"
+            ],
+            "@vizzio/integrations": [
+                "packages/integrations/src"
+            ],
+            "@vizzio/integrations/*": [
+                "packages/integrations/src/*"
+            ],
+            "@vizzio/ai-assistant": [
+                "packages/ai-assistant/src"
+            ],
+            "@vizzio/ai-assistant/*": [
+                "packages/ai-assistant/src/*"
+            ],
+            "@vizzio/cli": [
+                "packages/cli/src"
+            ],
+            "@vizzio/cli/*": [
+                "packages/cli/src/*"
+            ]
+        },
+        "types": [
+            "node"
+        ]
+    },
+    "include": [
+        "packages/*/src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "**/node_modules",
+        "**/dist"
+    ]
+}

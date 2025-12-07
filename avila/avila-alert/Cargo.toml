@@ -1,0 +1,24 @@
+[package]
+name = "avila-alert"
+version = "0.1.0"
+edition = "2021"
+authors = ["Avila Team"]
+description = "A flexible and ergonomic alert system for Rust applications - Pure Rust implementation"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/avila/avila-alert"
+keywords = ["alert", "notification", "logging", "messaging"]
+categories = ["development-tools", "rust-patterns"]
+
+[dependencies]
+# No external dependencies - Pure Rust implementation
+
+[dev-dependencies]
+# No external dependencies for testing
+
+[features]
+default = []
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

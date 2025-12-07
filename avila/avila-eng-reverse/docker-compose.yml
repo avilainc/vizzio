@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  deriax:
+    build: .
+    container_name: deriax
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data/input:/data/input
+      - ./data/output:/data/output
+      - ./data/cache:/data/cache
+      - ./data/logs:/data/logs
+      - ./config.toml:/data/config.toml
+    environment:
+      - RUST_LOG=info
+    networks:
+      - deriax-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: deriax-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - deriax-net
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: deriax-db
+    environment:
+      - POSTGRES_DB=deriax
+      - POSTGRES_USER=deriax
+      - POSTGRES_PASSWORD=deriax
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - deriax-net
+
+volumes:
+  redis-data:
+  postgres-data:
+
+networks:
+  deriax-net:
+    driver: bridge

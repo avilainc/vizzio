@@ -1,0 +1,145 @@
+# Vizzio Automation Platform - Gitignore
+
+# ============================================
+# DEPENDENCIES
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ============================================
+# BUILD OUTPUTS
+# ============================================
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+target/
+*.rlib
+*.rmeta
+*.so
+*.dylib
+*.dll
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.test.local
+
+# ============================================
+# IDE & EDITOR
+# ============================================
+.vscode/
+.idea/
+.vscode-test/
+*.code-workspace
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+*.iml
+*.iws
+*.ipr
+.metals/
+
+# ============================================
+# OS & SYSTEM
+# ============================================
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ============================================
+# TESTING & COVERAGE
+# ============================================
+coverage/
+.nyc_output/
+jest-cache/
+.jest-cache/
+.mocha_output/
+
+# ============================================
+# RUNTIME & LOGS
+# ============================================
+logs/
+*.log
+.cache/
+tmp/
+temp/
+
+# ============================================
+# DOCKER
+# ============================================
+docker-compose.override.yml
+.docker-sync/
+
+# ============================================
+# CARGO & RUST
+# ============================================
+Cargo.lock
+**/*.rs.bk
+.cargo/
+target/
+*.profraw
+*.profdata
+
+# ============================================
+# PYTHON
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+.hypothesis/
+
+# ============================================
+# NODE BUILD ARTIFACTS
+# ============================================
+.turbo/
+dist-*
+
+
+# Database
+*.mongodb
+mongo_data/
+
+# Cache
+.eslintcache
+.prettierignore
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# CI/CD
+.github/workflows/*.log
