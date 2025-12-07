@@ -189,22 +189,16 @@ jobs:
           curl -f http://staging.vizzio.local/health || exit 1
           curl -f http://staging.vizzio.local/api/health || exit 1
 
-      - name: Notify deployment
+      - name: Notify Sentry of staging deployment
         if: success()
-        uses: davisjtx/sendgrid-action@main
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: vizzio
         with:
-          from: 'noreply@avila.inc'
-          to: 'nicolas@avila.inc'
-          subject: '✅ Deployment to Staging Successful'
-          html: |
-            <h2>✅ Staging Deployment Successful</h2>
-            <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
-            <p><strong>Commit:</strong> ${{ github.sha }}</p>
-            <p><strong>Backend:</strong> ${{ needs.build-images.outputs.backend_image }}</p>
-            <p><strong>Frontend:</strong> ${{ needs.build-images.outputs.frontend_image }}</p>
-            <p><a href="https://staging.vizzio.local">Access Staging</a></p>
-          api_key: ${{ secrets.SENDGRID_API_KEY }}
-        continue-on-error: true
+          environment: staging
+          version: ${{ github.sha }}
 
   # ============================================================================
   # DEPLOY TO PRODUCTION
@@ -258,24 +252,16 @@ jobs:
           done
           exit 1
 
-      - name: Notify production deployment
+      - name: Notify Sentry of production deployment
         if: success()
-        uses: davisjtx/sendgrid-action@main
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: vizzio
         with:
-          from: 'noreply@avila.inc'
-          to: 'nicolas@avila.inc'
-          subject: '🎉 Production Deployment Successful - ${{ github.ref_name }}'
-          html: |
-            <h2>🎉 Production Deployment Successful</h2>
-            <p><strong>Version:</strong> ${{ github.ref_name }}</p>
-            <p><strong>Commit:</strong> ${{ github.sha }}</p>
-            <p><strong>Backend:</strong> ${{ needs.build-images.outputs.backend_image }}</p>
-            <p><strong>Frontend:</strong> ${{ needs.build-images.outputs.frontend_image }}</p>
-            <p><strong>Deployed by:</strong> ${{ github.actor }}</p>
-            <p><strong>Time:</strong> $(date)</p>
-            <p><a href="https://vizzio.com">Visit Production</a></p>
-          api_key: ${{ secrets.SENDGRID_API_KEY }}
-        continue-on-error: true
+          environment: production
+          version: ${{ github.sha }}
 
   # ============================================================================
   # ROLLBACK CAPABILITY
@@ -301,17 +287,21 @@ jobs:
           kubectl rollout undo deployment/vizzio-backend -n vizzio-prod
           kubectl rollout undo deployment/vizzio-frontend -n vizzio-prod
 
-      - name: Notify rollback
-        uses: davisjtx/sendgrid-action@main
-        with:
-          from: 'noreply@avila.inc'
-          to: 'nicolas@avila.inc'
-          subject: '⚠️ VIZZIO Production Rollback Triggered'
-          html: |
-            <h2>⚠️ Rollback Triggered</h2>
-            <p><strong>Reason:</strong> Deployment failed, automatic rollback initiated</p>
-            <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
-            <p><strong>Commit:</strong> ${{ github.sha }}</p>
-            <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Logs</a></p>
-          api_key: ${{ secrets.SENDGRID_API_KEY }}
-        continue-on-error: true
+      - name: Notify Sentry of rollback
+        run: |
+          curl -X POST https://sentry.io/api/0/projects/${{ secrets.SENTRY_ORG }}/vizzio/events/ \
+            -H "Authorization: Bearer ${{ secrets.SENTRY_AUTH_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "message": "Production Rollback Triggered",
+              "level": "error",
+              "tags": {
+                "environment": "production",
+                "branch": "${{ github.ref_name }}",
+                "commit": "${{ github.sha }}"
+              },
+              "extra": {
+                "reason": "Deployment failed",
+                "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              }
+            }' || true

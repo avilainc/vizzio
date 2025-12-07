@@ -251,7 +251,7 @@ jobs:
   # SEND NOTIFICATION
   # ============================================================================
   notify:
-    name: 📧 Notify Release
+    name: 📊 Notify Release
     runs-on: ubuntu-latest
     needs: [prepare, create-release]
     if: always()
@@ -259,33 +259,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install TypeScript
-        run: npm install -g typescript ts-node
-
-      - name: Generate release email
+      - name: Notify Sentry of release
+        uses: getsentry/action-release@v1
         env:
-          WORKFLOW_NAME: 'Release: v${{ needs.prepare.outputs.version }}'
-          JOB_STATUS: ${{ job.status }}
-          RELEASE_TYPE: ${{ needs.prepare.outputs.release_type }}
-        run: |
-          cd .github/scripts
-          npx ts-node generate-email.ts
-
-      - name: Send notification email
-        uses: davisjtx/sendgrid-action@main
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: vizzio
         with:
-          from: 'noreply@avila.inc'
-          to: 'nicolas@avila.inc'
-          subject: '🚀 VIZZIO Release v${{ needs.prepare.outputs.version }} - ${{ needs.prepare.outputs.release_type }}'
-          html: |
-            <h2>🎉 New Release: v${{ needs.prepare.outputs.version }}</h2>
-            <p><strong>Type:</strong> ${{ needs.prepare.outputs.release_type }}</p>
-            <p><strong>Pre-release:</strong> ${{ needs.prepare.outputs.is_prerelease }}</p>
-            <p><a href="${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}">Ver Release</a></p>
-          api_key: ${{ secrets.SENDGRID_API_KEY }}
-        continue-on-error: true
+          environment: production
+          version: ${{ needs.prepare.outputs.version }}
