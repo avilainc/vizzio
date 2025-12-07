@@ -16,9 +16,16 @@ on:
           - '14'
           - '30'
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   generate-report:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     
     steps:
       - name: Checkout repository

@@ -14,10 +14,17 @@ on:
       - develop
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   validate-openapi:
     runs-on: ubuntu-latest
     name: Validate OpenAPI Specification
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout repository
@@ -61,6 +68,8 @@ jobs:
   validate-postman-collection:
     runs-on: ubuntu-latest
     name: Validate Postman Collection
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout repository
@@ -84,6 +93,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Run Contract Tests
     needs: [validate-openapi, validate-postman-collection]
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout repository
@@ -136,6 +147,8 @@ jobs:
   lint-api-changes:
     runs-on: ubuntu-latest
     name: Lint API Changes
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout repository
@@ -187,6 +200,9 @@ jobs:
     name: Deployment Validation Checks
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     needs: [contract-tests]
+    permissions:
+      contents: read
+      pull-requests: write
     
     steps:
       - name: Checkout repository
