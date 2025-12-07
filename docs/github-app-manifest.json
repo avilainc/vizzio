@@ -1,0 +1,30 @@
+{
+  "name": "Vizzio Platform Insights",
+  "url": "https://vizzio.com",
+  "hook_attributes": {
+    "url": "https://api.vizzio.com/v1/github/webhooks"
+  },
+  "redirect_url": "https://vizzio.com/auth/github/callback",
+  "description": "Repository insights, analytics, and automation for the Vizzio platform. Track code quality, deployment metrics, and team productivity.",
+  "public": true,
+  "default_permissions": {
+    "contents": "read",
+    "issues": "write",
+    "pull_requests": "write",
+    "metadata": "read",
+    "repository_projects": "read"
+  },
+  "default_events": [
+    "issues",
+    "issue_comment",
+    "pull_request",
+    "pull_request_review",
+    "pull_request_review_comment",
+    "push",
+    "release",
+    "repository",
+    "status",
+    "deployment",
+    "deployment_status"
+  ]
+}

@@ -1,0 +1,560 @@
+{
+  "info": {
+    "name": "Vizzio Platform API",
+    "description": "Complete API collection for the Vizzio platform with authentication, monitoring, and testing capabilities",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.vizzio.com/v1",
+      "type": "string"
+    },
+    {
+      "key": "staging_url",
+      "value": "https://staging-api.vizzio.com/v1",
+      "type": "string"
+    },
+    {
+      "key": "local_url",
+      "value": "http://localhost:8080/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Monitoring",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has status field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData.status).to.be.oneOf(['ok', 'degraded', 'error']);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 500ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check the health status of the API service"
+          },
+          "response": []
+        },
+        {
+          "name": "Liveness Probe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Service is alive\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.alive).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/liveness",
+              "host": ["{{base_url}}"],
+              "path": ["liveness"]
+            },
+            "description": "Kubernetes liveness probe endpoint"
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness Probe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Service is ready\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.ready).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"All health checks pass\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.checks.database).to.be.true;",
+                  "    pm.expect(jsonData.checks.cache).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/readiness",
+              "host": ["{{base_url}}"],
+              "path": ["readiness"]
+            },
+            "description": "Kubernetes readiness probe endpoint"
+          },
+          "response": []
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["metrics"]
+            },
+            "description": "Retrieve Prometheus-compatible metrics"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cases",
+      "item": [
+        {
+          "name": "List Cases",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has data array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has pagination\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('pagination');",
+                  "    pm.expect(jsonData.pagination).to.have.property('page');",
+                  "    pm.expect(jsonData.pagination).to.have.property('total');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cases?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["cases"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "open",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieve a paginated list of cases"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Case",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Case has ID\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.environment.set('case_id', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Case\",\n  \"description\": \"Case description\",\n  \"priority\": \"medium\",\n  \"metadata\": {\n    \"source\": \"api\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cases",
+              "host": ["{{base_url}}"],
+              "path": ["cases"]
+            },
+            "description": "Create a new case"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Case",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Case has required fields\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('title');",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cases/{{case_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cases", "{{case_id}}"]
+            },
+            "description": "Get a specific case by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Case",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"high\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cases/{{case_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cases", "{{case_id}}"]
+            },
+            "description": "Update an existing case"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Usage Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has metrics\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('metrics');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/usage?startDate=2024-12-01T00:00:00Z&endDate=2024-12-07T23:59:59Z&granularity=day",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "usage"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-12-01T00:00:00Z"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-07T23:59:59Z"
+                },
+                {
+                  "key": "granularity",
+                  "value": "day"
+                }
+              ]
+            },
+            "description": "Get platform usage statistics"
+          },
+          "response": []
+        },
+        {
+          "name": "Error Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has topErrors array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('topErrors');",
+                  "    pm.expect(jsonData.topErrors).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/errors?startDate=2024-12-01T00:00:00Z&endDate=2024-12-07T23:59:59Z&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "errors"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-12-01T00:00:00Z"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-07T23:59:59Z"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get error statistics and top errors"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "item": [
+        {
+          "name": "List Subscriptions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has data array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/billing/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "subscriptions"]
+            },
+            "description": "List all subscriptions"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Telemetry",
+      "item": [
+        {
+          "name": "Submit Traces",
+          "request": {
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "value",
+                  "value": "{{api_key}}",
+                  "type": "string"
+                },
+                {
+                  "key": "key",
+                  "value": "X-API-Key",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"traces\": [\n    {\n      \"traceId\": \"trace-123\",\n      \"spanId\": \"span-456\",\n      \"timestamp\": \"2024-12-07T10:00:00Z\",\n      \"duration\": 150,\n      \"name\": \"GET /api/cases\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/telemetry/traces",
+              "host": ["{{base_url}}"],
+              "path": ["telemetry", "traces"]
+            },
+            "description": "Submit OpenTelemetry traces"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set timestamp for requests",
+          "pm.environment.set('timestamp', new Date().toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test to check response time",
+          "pm.test(\"Response time is reasonable\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});"
+        ]
+      }
+    }
+  ]
+}
