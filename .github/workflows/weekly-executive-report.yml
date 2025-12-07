@@ -5,6 +5,16 @@ on:
     # Run every Monday at 8:00 AM UTC
     - cron: '0 8 * * 1'
   workflow_dispatch:  # Allow manual trigger
+    inputs:
+      report_period_days:
+        description: 'Report period in days'
+        required: false
+        default: '7'
+        type: choice
+        options:
+          - '7'
+          - '14'
+          - '30'
 
 jobs:
   generate-report:
@@ -44,7 +54,7 @@ jobs:
           
           # Report Configuration
           EXECUTIVE_REPORT_RECIPIENTS: ${{ secrets.EXECUTIVE_REPORT_RECIPIENTS }}
-          REPORT_PERIOD_DAYS: '7'
+          REPORT_PERIOD_DAYS: ${{ github.event.inputs.report_period_days || '7' }}
         run: node .github/scripts/generate-executive-report.js
 
       - name: Notify on failure

@@ -190,7 +190,7 @@ Recommended providers:
    ```
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
-   SMTP_SECURE=false
+   SMTP_SECURE=true  # Use TLS for secure connection
    SMTP_USER=your-email@gmail.com
    SMTP_PASSWORD=<app-password>
    ```

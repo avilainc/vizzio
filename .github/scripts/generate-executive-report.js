@@ -59,32 +59,48 @@ async function fetchStripeRevenue() {
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
-    // Fetch charges for different periods
-    const weekCharges = await stripe.charges.list({
-      created: { gte: Math.floor(weekAgo.getTime() / 1000) },
-      limit: 100,
-    });
+    // Helper function to fetch all charges with pagination
+    const fetchAllCharges = async (created) => {
+      let allCharges = [];
+      let hasMore = true;
+      let startingAfter = null;
 
-    const monthCharges = await stripe.charges.list({
-      created: { gte: Math.floor(monthAgo.getTime() / 1000) },
-      limit: 100,
-    });
+      while (hasMore) {
+        const params = {
+          created,
+          limit: 100,
+        };
+        if (startingAfter) {
+          params.starting_after = startingAfter;
+        }
 
-    const yearCharges = await stripe.charges.list({
-      created: { gte: Math.floor(yearAgo.getTime() / 1000) },
-      limit: 100,
-    });
+        const charges = await stripe.charges.list(params);
+        allCharges = allCharges.concat(charges.data);
+        hasMore = charges.has_more;
+        
+        if (hasMore && charges.data.length > 0) {
+          startingAfter = charges.data[charges.data.length - 1].id;
+        }
+      }
+
+      return allCharges;
+    };
+
+    // Fetch charges for different periods with pagination
+    const weekCharges = await fetchAllCharges({ gte: Math.floor(weekAgo.getTime() / 1000) });
+    const monthCharges = await fetchAllCharges({ gte: Math.floor(monthAgo.getTime() / 1000) });
+    const yearCharges = await fetchAllCharges({ gte: Math.floor(yearAgo.getTime() / 1000) });
 
     // Calculate revenues
-    const weekRevenue = weekCharges.data
+    const weekRevenue = weekCharges
       .filter(c => c.paid && !c.refunded)
       .reduce((sum, c) => sum + c.amount, 0) / 100;
 
-    const monthRevenue = monthCharges.data
+    const monthRevenue = monthCharges
       .filter(c => c.paid && !c.refunded)
       .reduce((sum, c) => sum + c.amount, 0) / 100;
 
-    const yearRevenue = yearCharges.data
+    const yearRevenue = yearCharges
       .filter(c => c.paid && !c.refunded)
       .reduce((sum, c) => sum + c.amount, 0) / 100;
 
@@ -115,7 +131,7 @@ async function fetchStripeRevenue() {
       yearRevenue: yearRevenue.toFixed(2),
       newSubscriptions: newSubscriptions.data.length,
       activeSubscriptions: activeSubscriptions.data.length,
-      churnRate: 0, // Calculate based on historical data
+      churnRate: 0, // Note: Requires historical subscription data for accurate calculation
       mrr: mrr.toFixed(2),
       arr: arr.toFixed(2),
     };

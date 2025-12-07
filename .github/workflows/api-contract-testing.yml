@@ -145,8 +145,12 @@ jobs:
         run: |
           echo "🔍 Checking API versioning..."
           
-          # Ensure version is present in OpenAPI spec
-          VERSION=$(grep -oP 'version:\s*\K[^\s]+' docs/openapi.yaml | head -1)
+          # Install yq for proper YAML parsing
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          
+          # Extract version using yq
+          VERSION=$(yq eval '.info.version' docs/openapi.yaml)
           
           if [ -z "$VERSION" ]; then
             echo "❌ Version not found in OpenAPI spec"

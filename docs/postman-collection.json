@@ -380,17 +380,19 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/analytics/usage?startDate=2024-12-01T00:00:00Z&endDate=2024-12-07T23:59:59Z&granularity=day",
+              "raw": "{{base_url}}/analytics/usage?startDate={{startDate}}&endDate={{endDate}}&granularity=day",
               "host": ["{{base_url}}"],
               "path": ["analytics", "usage"],
               "query": [
                 {
                   "key": "startDate",
-                  "value": "2024-12-01T00:00:00Z"
+                  "value": "{{startDate}}",
+                  "description": "Auto-generated: 7 days ago"
                 },
                 {
                   "key": "endDate",
-                  "value": "2024-12-07T23:59:59Z"
+                  "value": "{{endDate}}",
+                  "description": "Auto-generated: now"
                 },
                 {
                   "key": "granularity",
@@ -427,17 +429,19 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/analytics/errors?startDate=2024-12-01T00:00:00Z&endDate=2024-12-07T23:59:59Z&limit=10",
+              "raw": "{{base_url}}/analytics/errors?startDate={{startDate}}&endDate={{endDate}}&limit=10",
               "host": ["{{base_url}}"],
               "path": ["analytics", "errors"],
               "query": [
                 {
                   "key": "startDate",
-                  "value": "2024-12-01T00:00:00Z"
+                  "value": "{{startDate}}",
+                  "description": "Auto-generated: 7 days ago"
                 },
                 {
                   "key": "endDate",
-                  "value": "2024-12-07T23:59:59Z"
+                  "value": "{{endDate}}",
+                  "description": "Auto-generated: now"
                 },
                 {
                   "key": "limit",
@@ -540,7 +544,13 @@
         "type": "text/javascript",
         "exec": [
           "// Set timestamp for requests",
-          "pm.environment.set('timestamp', new Date().toISOString());"
+          "pm.environment.set('timestamp', new Date().toISOString());",
+          "",
+          "// Set dynamic date ranges",
+          "const now = new Date();",
+          "const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);",
+          "pm.environment.set('endDate', now.toISOString());",
+          "pm.environment.set('startDate', sevenDaysAgo.toISOString());"
         ]
       }
     },

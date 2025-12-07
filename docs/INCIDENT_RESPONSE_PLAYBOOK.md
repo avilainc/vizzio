@@ -286,6 +286,8 @@ This playbook provides step-by-step procedures for responding to incidents in th
 
 3. Verify Stripe API connectivity
    ```bash
+   # Use environment variable instead of inline secret
+   export STRIPE_API_KEY="your_key_here"
    curl -u "$STRIPE_API_KEY:" https://api.stripe.com/v1/charges
    ```
 
