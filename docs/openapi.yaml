@@ -1,0 +1,747 @@
+openapi: 3.0.3
+info:
+  title: Vizzio Platform API
+  description: |
+    Unified API specification for the Vizzio platform, consolidating all backend services
+    under a single API surface with versioning, authentication, and comprehensive monitoring.
+  version: 1.0.0
+  contact:
+    name: Vizzio Platform Team
+    email: platform@vizzio.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.vizzio.com/v1
+    description: Production server
+  - url: https://staging-api.vizzio.com/v1
+    description: Staging server
+  - url: http://localhost:8080/v1
+    description: Local development server
+
+tags:
+  - name: health
+    description: Service health and monitoring endpoints
+  - name: users
+    description: User management operations
+  - name: analytics
+    description: Analytics and reporting endpoints
+  - name: cases
+    description: Client strategy analyzer cases
+  - name: billing
+    description: Stripe billing integration
+  - name: telemetry
+    description: Telemetry and observability
+
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health check endpoint
+      description: Returns the health status of the API service
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+                timestamp: "2024-12-07T10:00:00Z"
+                version: "1.0.0"
+                uptime: 3600
+  
+  /liveness:
+    get:
+      tags:
+        - health
+      summary: Liveness probe
+      description: Kubernetes liveness probe endpoint
+      operationId: getLiveness
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alive:
+                    type: boolean
+                    example: true
+
+  /readiness:
+    get:
+      tags:
+        - health
+      summary: Readiness probe
+      description: Kubernetes readiness probe endpoint
+      operationId: getReadiness
+      responses:
+        '200':
+          description: Service is ready to accept traffic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ready:
+                    type: boolean
+                    example: true
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: boolean
+                        example: true
+                      cache:
+                        type: boolean
+                        example: true
+
+  /metrics:
+    get:
+      tags:
+        - health
+      summary: Prometheus metrics
+      description: Returns Prometheus-compatible metrics
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP http_requests_total Total HTTP requests
+                  # TYPE http_requests_total counter
+                  http_requests_total{method="GET",status="200"} 1234
+
+  /cases:
+    get:
+      tags:
+        - cases
+      summary: List all cases
+      description: Retrieve a paginated list of client strategy analyzer cases
+      operationId: listCases
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          description: Filter by case status
+          schema:
+            type: string
+            enum: [open, in_progress, closed]
+      responses:
+        '200':
+          description: Successfully retrieved cases
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+    
+    post:
+      tags:
+        - cases
+      summary: Create a new case
+      description: Create a new client strategy analyzer case
+      operationId: createCase
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCaseRequest'
+      responses:
+        '201':
+          description: Case created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /cases/{caseId}:
+    get:
+      tags:
+        - cases
+      summary: Get a specific case
+      description: Retrieve details of a specific case by ID
+      operationId: getCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          description: Unique identifier of the case
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully retrieved case
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    
+    put:
+      tags:
+        - cases
+      summary: Update a case
+      description: Update an existing case
+      operationId: updateCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          description: Unique identifier of the case
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCaseRequest'
+      responses:
+        '200':
+          description: Case updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /analytics/usage:
+    get:
+      tags:
+        - analytics
+      summary: Get usage statistics
+      description: Retrieve platform usage statistics for a given time period
+      operationId: getUsageStats
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          description: Start date for the statistics (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: true
+          description: End date for the statistics (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: granularity
+          in: query
+          description: Time granularity for aggregation
+          schema:
+            type: string
+            enum: [hour, day, week, month]
+            default: day
+      responses:
+        '200':
+          description: Successfully retrieved usage statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStats'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /analytics/errors:
+    get:
+      tags:
+        - analytics
+      summary: Get error statistics
+      description: Retrieve top errors and error trends
+      operationId: getErrorStats
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          description: Start date for the statistics (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: true
+          description: End date for the statistics (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Number of top errors to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Successfully retrieved error statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorStats'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /billing/subscriptions:
+    get:
+      tags:
+        - billing
+      summary: List subscriptions
+      description: Retrieve all active subscriptions
+      operationId: listSubscriptions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved subscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /billing/webhooks/stripe:
+    post:
+      tags:
+        - billing
+      summary: Stripe webhook handler
+      description: Handle incoming Stripe webhook events
+      operationId: handleStripeWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed successfully
+        '400':
+          description: Invalid webhook signature or payload
+
+  /telemetry/traces:
+    post:
+      tags:
+        - telemetry
+      summary: Submit traces
+      description: Submit OpenTelemetry traces
+      operationId: submitTraces
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: OpenTelemetry trace data
+      responses:
+        '202':
+          description: Traces accepted for processing
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for user authentication
+    
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service-to-service authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+          description: Overall health status
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the health check
+        version:
+          type: string
+          description: API version
+        uptime:
+          type: integer
+          description: Service uptime in seconds
+
+    Case:
+      type: object
+      required:
+        - id
+        - title
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier
+        title:
+          type: string
+          description: Case title
+        description:
+          type: string
+          description: Case description
+        status:
+          type: string
+          enum: [open, in_progress, closed]
+          description: Current status
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          description: Priority level
+        assignee:
+          type: string
+          description: Assigned user ID
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional case metadata
+
+    CreateCaseRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          default: medium
+        assignee:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UpdateCaseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        status:
+          type: string
+          enum: [open, in_progress, closed]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        assignee:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    CaseListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Case'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    UsageStats:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        metrics:
+          type: object
+          properties:
+            activeUsers:
+              type: object
+              properties:
+                daily:
+                  type: integer
+                weekly:
+                  type: integer
+                monthly:
+                  type: integer
+            apiCalls:
+              type: object
+              properties:
+                total:
+                  type: integer
+                byEndpoint:
+                  type: object
+                  additionalProperties:
+                    type: integer
+            featureUsage:
+              type: object
+              additionalProperties:
+                type: integer
+
+    ErrorStats:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        topErrors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorType:
+                type: string
+              count:
+                type: integer
+              rate:
+                type: number
+                format: float
+              affectedServices:
+                type: array
+                items:
+                  type: string
+              lastOccurrence:
+                type: string
+                format: date-time
+
+    SubscriptionList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+        hasMore:
+          type: boolean
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        status:
+          type: string
+          enum: [active, canceled, past_due, trialing]
+        planId:
+          type: string
+        currentPeriodStart:
+          type: string
+          format: date-time
+        currentPeriodEnd:
+          type: string
+          format: date-time
+        cancelAtPeriodEnd:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+          description: Request ID for tracking
+
+  responses:
+    BadRequestError:
+      description: Bad request - invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BAD_REQUEST
+            message: Invalid input parameters
+            timestamp: "2024-12-07T10:00:00Z"
+            requestId: "req_123456"
+
+    UnauthorizedError:
+      description: Unauthorized - invalid or missing credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: UNAUTHORIZED
+            message: Invalid or missing authentication token
+            timestamp: "2024-12-07T10:00:00Z"
+            requestId: "req_123456"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NOT_FOUND
+            message: The requested resource was not found
+            timestamp: "2024-12-07T10:00:00Z"
+            requestId: "req_123456"
+
+    RateLimitError:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per time window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when the rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: RATE_LIMIT_EXCEEDED
+            message: Too many requests. Please try again later.
+            timestamp: "2024-12-07T10:00:00Z"
+            requestId: "req_123456"
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
