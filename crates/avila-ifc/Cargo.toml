@@ -1,0 +1,58 @@
+[package]
+name = "avila-ifc"
+version = "0.1.0"
+edition = "2021"
+authors = ["Avila Inc"]
+description = "High-performance IFC (Industry Foundation Classes) parser and processor in Rust"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Avilainc/vizzio"
+keywords = ["ifc", "bim", "cad", "step", "iso-10303"]
+categories = ["parser-implementations", "data-structures", "encoding"]
+
+[dependencies]
+# Core parsing
+nom = "7.1"
+pest = "2.7"
+pest_derive = "2.7"
+regex = "1.10"
+
+# Data structures
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+indexmap = "2.2"
+ahash = "0.8"
+
+# Geometry processing
+glam = "0.27"
+nalgebra = "0.32"
+
+# Performance
+rayon = "1.8"
+memmap2 = "0.9"
+dashmap = "5.5"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+
+# Utilities
+uuid = { version = "1.7", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.4"
+tempfile = "3.10"
+
+[features]
+default = ["parallel", "geometry"]
+parallel = ["rayon"]
+geometry = ["glam", "nalgebra"]
+serde_support = ["serde", "serde_json"]
+
+[[bench]]
+name = "parse_benchmark"
+harness = false
