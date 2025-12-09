@@ -1,0 +1,20 @@
+apiVersion: v2
+name: avila-cloud
+description: Avila Cloud Platform - Enterprise Cloud Infrastructure
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - cloud
+  - platform
+  - paas
+  - infrastructure
+maintainers:
+  - name: Nícolas Ávila
+    email: nicolas@avila.inc
+  - name: Avila Development Team
+    email: dev@avila.inc
+home: https://avila.inc
+sources:
+  - https://github.com/avilaops/arxis
+icon: https://avila.inc/logo.png

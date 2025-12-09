@@ -1,0 +1,244 @@
+# Default values for avila-cloud
+# This is a YAML-formatted file.
+
+# ============================================================================
+# Global Settings
+# ============================================================================
+global:
+  imageRegistry: ghcr.io
+  imagePullSecrets: []
+  storageClass: ""
+
+# ============================================================================
+# Avila Cloud API
+# ============================================================================
+avilaCloud:
+  enabled: true
+  name: avila-cloud
+  image:
+    repository: ghcr.io/avilaops/avila-cloud
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 3
+
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+    annotations: {}
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+  env:
+    - name: RUST_LOG
+      value: "info"
+    - name: AVILA_CLOUD_PORT
+      value: "8080"
+
+  envFrom:
+    - secretRef:
+        name: avila-cloud-secrets
+    - configMapRef:
+        name: avila-cloud-config
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# ============================================================================
+# PostgreSQL Database
+# ============================================================================
+postgresql:
+  enabled: true
+  auth:
+    username: avila
+    password: changeme
+    database: avilacloud
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+# ============================================================================
+# Redis Cache
+# ============================================================================
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: changeme
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+# ============================================================================
+# Prometheus Monitoring
+# ============================================================================
+prometheus:
+  enabled: true
+  server:
+    persistentVolume:
+      enabled: true
+      size: 20Gi
+    retention: 30d
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+
+# ============================================================================
+# Grafana Dashboards
+# ============================================================================
+grafana:
+  enabled: true
+  adminPassword: changeme
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-server:80
+          access: proxy
+          isDefault: true
+
+# ============================================================================
+# Ingress
+# ============================================================================
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: api.avila.cloud
+      paths:
+        - path: /
+          pathType: Prefix
+          service: avila-cloud
+          port: 8080
+    - host: dashboard.avila.cloud
+      paths:
+        - path: /
+          pathType: Prefix
+          service: grafana
+          port: 80
+  tls:
+    - secretName: avila-cloud-tls
+      hosts:
+        - api.avila.cloud
+        - dashboard.avila.cloud
+
+# ============================================================================
+# Service Account
+# ============================================================================
+serviceAccount:
+  create: true
+  annotations: {}
+  name: avila-cloud
+
+# ============================================================================
+# Security
+# ============================================================================
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+# ============================================================================
+# Pod Disruption Budget
+# ============================================================================
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# ============================================================================
+# Network Policy
+# ============================================================================
+networkPolicy:
+  enabled: false
+  policyTypes:
+    - Ingress
+    - Egress
+
+# ============================================================================
+# Persistence
+# ============================================================================
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+# ============================================================================
+# Node Affinity
+# ============================================================================
+affinity: {}
+nodeSelector: {}
+tolerations: []

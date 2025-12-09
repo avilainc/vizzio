@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "avila-cloud.fullname" . }}
+  labels:
+    {{- include "avila-cloud.labels" . | nindent 4 }}
+  {{- with .Values.avilaCloud.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.avilaCloud.service.type }}
+  ports:
+    - port: {{ .Values.avilaCloud.service.port }}
+      targetPort: {{ .Values.avilaCloud.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "avila-cloud.selectorLabels" . | nindent 4 }}

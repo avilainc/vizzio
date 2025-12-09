@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIZZIO Build Monitor</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #334155;
+      padding: 20px 0;
+      margin-bottom: 30px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      border: 1px solid #475569;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: #64748b;
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .stat-subtext {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    .builds-section {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .builds-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #475569;
+    }
+
+    .builds-header h2 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 1px solid #475569;
+      background: transparent;
+      color: #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #10b981;
+      border-color: #10b981;
+    }
+
+    .builds-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .build-item {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .build-item:hover {
+      border-color: #64748b;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      transform: translateX(5px);
+    }
+
+    .build-item.success { border-left: 4px solid #10b981; }
+    .build-item.failure { border-left: 4px solid #ef4444; }
+    .build-item.running { border-left: 4px solid #3b82f6; }
+    .build-item.cancelled { border-left: 4px solid #f59e0b; }
+
+    .build-info {
+      flex: 1;
+    }
+
+    .build-workflow {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .build-meta {
+      display: flex;
+      gap: 15px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .build-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .build-status.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .build-status.failure {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+
+    .build-status.running {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .build-status.cancelled {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .build-duration {
+      font-size: 12px;
+      color: #94a3b8;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .status-badge {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: none;
+    }
+
+    .status-badge.running {
+      background: #3b82f6;
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-badge.success {
+      background: #10b981;
+    }
+
+    .status-badge.failure {
+      background: #ef4444;
+    }
+
+    .status-badge.cancelled {
+      background: #f59e0b;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .scrollbar::-webkit-scrollbar-track {
+      background: rgba(51, 65, 85, 0.5);
+      border-radius: 4px;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb {
+      background: #64748b;
+      border-radius: 4px;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .builds-list {
+      scrollbar-color: #64748b rgba(51, 65, 85, 0.5);
+      scrollbar-width: thin;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>
+        <span class="status-indicator"></span>
+        VIZZIO Build Monitor
+      </h1>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total de Builds</div>
+        <div class="stat-value" id="total-builds">0</div>
+        <div class="stat-subtext" id="success-rate">-</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Taxa de Sucesso</div>
+        <div class="stat-value" id="success-percentage">0%</div>
+        <div class="stat-subtext">Últimos 50 builds</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Builds em Andamento</div>
+        <div class="stat-value" id="running-builds">0</div>
+        <div class="stat-subtext" id="last-build">-</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Duração Média</div>
+        <div class="stat-value" id="avg-duration">-</div>
+        <div class="stat-subtext">Últimos builds</div>
+      </div>
+    </div>
+
+    <div class="builds-section">
+      <div class="builds-header">
+        <h2>Builds Recentes</h2>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">Todos</button>
+          <button class="filter-btn" data-filter="running">Rodando</button>
+          <button class="filter-btn" data-filter="success">✅ Sucesso</button>
+          <button class="filter-btn" data-filter="failure">❌ Falha</button>
+        </div>
+      </div>
+
+      <div class="builds-list scrollbar" id="builds-list">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p>Aguardando builds...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io(window.location.origin);
+    let allBuilds = [];
+    let currentFilter = 'all';
+
+    // Conexão WebSocket
+    socket.on('connect', () => {
+      console.log('✅ Conectado ao monitor');
+      socket.emit('request-recent-builds');
+    });
+
+    socket.on('recent-builds', (builds) => {
+      allBuilds = builds;
+      renderBuilds();
+      updateStats();
+    });
+
+    socket.on('build-started', (build) => {
+      allBuilds.unshift(build);
+      renderBuilds();
+    });
+
+    socket.on('build-completed', (build) => {
+      const index = allBuilds.findIndex(b => b.buildId === build.buildId);
+      if (index !== -1) {
+        allBuilds[index] = build;
+      }
+      renderBuilds();
+      updateStats();
+    });
+
+    socket.on('build-log', ({ buildId, log }) => {
+      const build = allBuilds.find(b => b.buildId === buildId);
+      if (build) {
+        if (!build.logs) build.logs = [];
+        build.logs.push(log);
+        renderBuilds();
+      }
+    });
+
+    // Renderizar builds
+    function renderBuilds() {
+      const container = document.getElementById('builds-list');
+      const filtered = allBuilds.filter(b =>
+        currentFilter === 'all' || b.status === currentFilter
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>Nenhum build para exibir</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(build => {
+        const duration = build.duration ? formatDuration(build.duration) : '...';
+        const statusEmoji = {
+          success: '✅',
+          failure: '❌',
+          running: '🔄',
+          cancelled: '⚠️'
+        }[build.status];
+
+        return `
+          <div class="build-item ${build.status}" onclick="showDetails('${build.buildId}')">
+            <div class="build-info">
+              <div class="build-workflow">${statusEmoji} ${build.workflow}</div>
+              <div class="build-meta">
+                <span>🌿 ${build.branch}</span>
+                <span>📝 ${build.commit.substring(0, 8)}</span>
+                <span>👤 ${build.author}</span>
+                <span>🕐 ${new Date(build.timestamp).toLocaleString('pt-BR')}</span>
+              </div>
+            </div>
+            <div class="build-duration">${duration}</div>
+            <div class="build-status ${build.status}">
+              <span class="status-badge ${build.status}"></span>
+              ${build.status.charAt(0).toUpperCase() + build.status.slice(1)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Atualizar estatísticas
+    async function updateStats() {
+      try {
+        const response = await fetch('/api/stats');
+        const stats = await response.json();
+
+        document.getElementById('total-builds').textContent = stats.total;
+        document.getElementById('success-percentage').textContent = stats.successRate;
+        document.getElementById('running-builds').textContent =
+          allBuilds.filter(b => b.status === 'running').length;
+        document.getElementById('avg-duration').textContent =
+          stats.avgDuration ? formatDuration(Math.round(stats.avgDuration)) : '-';
+      } catch (error) {
+        console.error('Erro ao atualizar stats:', error);
+      }
+    }
+
+    // Filtros
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.dataset.filter;
+        renderBuilds();
+      });
+    });
+
+    // Utilities
+    function formatDuration(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      if (mins > 0) return `${mins}m ${secs}s`;
+      return `${secs}s`;
+    }
+
+    function showDetails(buildId) {
+      window.location.href = `/builds/${buildId}`;
+    }
+
+    // Auto-update
+    setInterval(updateStats, 30000);
+  </script>
+</body>
+</html>

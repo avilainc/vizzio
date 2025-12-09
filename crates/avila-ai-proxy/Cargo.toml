@@ -1,0 +1,15 @@
+[package]
+name = "avila-ai-proxy"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "avila-ai-proxy"
+path = "src/main.rs"
+
+[dependencies]
+# Sem dependências externas - usando apenas std library
+
+[features]
+default = ["std"]
+std = []

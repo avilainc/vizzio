@@ -1,0 +1,7 @@
+﻿[package]
+name = "avx-http"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+

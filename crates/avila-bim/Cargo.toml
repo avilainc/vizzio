@@ -1,0 +1,11 @@
+[package]
+name = "avila-bim"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+avila-error = { path = "../avila-error" }
+
+[features]
+default = ["std"]
+std = []

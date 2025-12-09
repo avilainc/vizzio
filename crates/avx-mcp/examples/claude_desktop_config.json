@@ -1,0 +1,19 @@
+{
+    "mcpServers": {
+        "avx": {
+            "command": "avx-cli",
+            "args": [
+                "mcp",
+                "serve"
+            ],
+            "env": {
+                "AVX__STACK": "production",
+                "AVX__LAYER": "core",
+                "AVX__ENV": "prod",
+                "AVX__CLUSTER": "us-east-1",
+                "AVX__MESH": "istio",
+                "RUST_LOG": "avx_mcp=info"
+            }
+        }
+    }
+}

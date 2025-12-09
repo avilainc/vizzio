@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "avila-cloud.fullname" . }}
+  labels:
+    {{- include "avila-cloud.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.avilaCloud.autoscaling.enabled }}
+  replicas: {{ .Values.avilaCloud.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "avila-cloud.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.avilaCloud.service.port }}"
+        prometheus.io/path: "/metrics"
+      labels:
+        {{- include "avila-cloud.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "avila-cloud.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.avilaCloud.image.repository }}:{{ .Values.avilaCloud.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.avilaCloud.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.avilaCloud.service.targetPort }}
+              protocol: TCP
+          env:
+            {{- toYaml .Values.avilaCloud.env | nindent 12 }}
+          envFrom:
+            {{- toYaml .Values.avilaCloud.envFrom | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.avilaCloud.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.avilaCloud.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.avilaCloud.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/avila-cloud/data
+            - name: logs
+              mountPath: /var/lib/avila-cloud/logs
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "avila-cloud.fullname" . }}-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: logs
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

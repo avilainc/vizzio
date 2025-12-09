@@ -1,0 +1,11 @@
+{
+  "license_id": "AVX-EXAMPLE-2024-001",
+  "organization": "Example Corporation",
+  "contact_email": "admin@example.com",
+  "tier": "Professional",
+  "issued_at": 1701388800,
+  "expires_at": 1732924800,
+  "max_nodes": 10,
+  "custom_features": [],
+  "signature": "BLS_SIGNATURE_PLACEHOLDER_96_BYTES_WILL_BE_HERE_AFTER_IMPLEMENTATION"
+}

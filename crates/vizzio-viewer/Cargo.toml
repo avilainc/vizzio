@@ -1,0 +1,21 @@
+[package]
+name = "vizzio-viewer"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "vizzio-viewer"
+path = "src/main.rs"
+
+[dependencies]
+# Avila Stack - tudo que precisamos já está aqui!
+# Servidor HTTP: Padrão avila-ai-proxy (std::net::TcpListener)
+avila-bim = { path = "../avila-bim" }
+avila-vision = { path = "../avila-vision" }
+avila-error = { path = "../avila-error" }
+
+[profile.release]
+opt-level = 3           # Máxima performance
+lto = true              # Link-time optimization
+codegen-units = 1       # Otimização agressiva
+strip = true            # Remove símbolos de debug
